@@ -226,7 +226,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		
 		// Get on the other side of it now
-		sleep_for_nanos( offset + 1'000'000 );
+		sleep_for_nanos( offset/8 + 1'000'000 );
 		sleep_cycle=0;
 	}
 }
