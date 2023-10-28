@@ -106,8 +106,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	uint64_t rollingMaxDrawTime = g_uStartingDrawTime;
 
 	const uint64_t range = g_uVBlankRateOfDecayMax;
+	uint8_t sleep_cycle = 0;
 	while ( true )
 	{
+		sleep_cycle++;
 		const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
 		const uint64_t nsecInterval = 1'000'000'000ul / refresh;
 		// The redzone is relative to 60Hz, scale it by our
@@ -200,10 +202,13 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 
-		uint64_t targetPoint = vblank_next_target( offset );
+		uint64_t targetPoint = vblank_next_target( (offset/2) );
 
 		sleep_until_nanos( targetPoint );
-
+		if (sleep_cycle < 2)
+		{
+			continue;
+		}
 		VBlankTimeInfo_t time_info =
 		{
 			.target_vblank_time = targetPoint + offset,
@@ -222,6 +227,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		
 		// Get on the other side of it now
 		sleep_for_nanos( offset + 1'000'000 );
+		sleep_cycle=0;
 	}
 }
 
