@@ -70,12 +70,22 @@ uint64_t vblank_next_target( uint64_t offset )
 	const uint64_t nsecInterval = 1'000'000'000ul / refresh;
 
 	uint64_t lastVblank = g_lastVblank - offset;
-
+        assert(lastVblank <= g_lastVblank);
+        assert(lastVblank <= offset);
 	uint64_t now = get_time_in_nanos();
 	uint64_t targetPoint = lastVblank + nsecInterval;
+	if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
+	{
+		assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
+	}
 	while ( targetPoint < now )
+		if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
+		{
+			assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
+		}
+	        
 		targetPoint += nsecInterval;
-
+        
 	return targetPoint;
 }
 
@@ -118,10 +128,19 @@ void vblankThreadRun( void )
 			// we get back into a good state and then regress again.
 
 			// If we go over half of our deadzone, be more defensive about things.
+			assert( int64_t(drawTime) >= 0);
 			if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
 				rollingMaxDrawTime = drawTime;
 			else
+			{
+				assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
+				assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
+				
+				assert( ( alpha * rollingMaxDrawTime )/range <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range
+				      &&( alpha * rollingMaxDrawTime ) <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) 
+				      ); 
 				rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
+			}
 
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
@@ -130,6 +149,8 @@ void vblankThreadRun( void )
 			g_uRollingMaxDrawTime = rollingMaxDrawTime;
 
 			offset = rollingMaxDrawTime + redZone;
+			assert(offset > rollingMaxDrawTime);
+			assert(offset > redZone);
 		}
 		else
 		{
