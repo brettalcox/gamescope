@@ -201,7 +201,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastDrawTime = drawTime;
 		lastOffset = offset;
 #endif
-		if ((offset/(2*sleep_cycle))<1'000'000l)
+		if ((offset/(2*sleep_cycle))<4'000'000l)
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle));
