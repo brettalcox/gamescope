@@ -93,7 +93,7 @@ uint64_t vblank_next_target( uint64_t offset )
 		targetPoint += nsecInterval;
 	}
         
-        assert(targetPoint <= targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot);)
+        assert(targetPoint <= targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot));
 	return targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot);
 }
 
