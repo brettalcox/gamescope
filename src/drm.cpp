@@ -1625,7 +1625,9 @@ int drm_commit(struct drm_t *drm, const struct FrameInfo_t *frameInfo )
 
 
 	assert( drm->fbids_queued.size() == 0 );
-
+	uint64_t time_now;
+	uint64_t copied_g_uVblankDrawTimeNS;
+	uint64_t g_SteamCompMgrVBlankTime_pipe_write_time_copied;
 	bool isPageFlip = drm->flags & DRM_MODE_PAGE_FLIP_EVENT;
 
 	if ( isPageFlip ) {
@@ -1717,9 +1719,9 @@ int drm_commit(struct drm_t *drm, const struct FrameInfo_t *frameInfo )
 	// is queued and would end up being the new page flip, rather than here.
 	// However, the page flip handler is called when the page flip occurs,
 	// not when it is successfully queued.
-	uint64_t time_now = get_time_in_nanos();
-	uint64_t copied_g_uVblankDrawTimeNS = g_uVblankDrawTimeNS;
-	uint64_t g_SteamCompMgrVBlankTime_pipe_write_time_copied = g_SteamCompMgrVBlankTime.pipe_write_time;
+	time_now = get_time_in_nanos();
+	copied_g_uVblankDrawTimeNS = g_uVblankDrawTimeNS;
+	g_SteamCompMgrVBlankTime_pipe_write_time_copied = g_SteamCompMgrVBlankTime.pipe_write_time;
 	
 	copied_g_uVblankDrawTimeNS = time_now - g_SteamCompMgrVBlankTime_pipe_write_time_copied;
 	assert(copied_g_uVblankDrawTimeNS <= time_now);
