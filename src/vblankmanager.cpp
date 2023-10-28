@@ -19,6 +19,7 @@
 #include "wlserver.hpp"
 #include "main.hpp"
 #include "drm.hpp"
+#include <iostream>
 
 #if HAVE_OPENVR
 #include "vr_session.hpp"
@@ -71,7 +72,11 @@ uint64_t vblank_next_target( uint64_t offset )
 
 	uint64_t lastVblank = g_lastVblank - offset;
         assert(lastVblank <= g_lastVblank);
-        assert(lastVblank <= offset);
+        if (lastVblank > offset) 
+        {
+        	std::cout << "I think I overflowed:\n"
+        	<< "lastVblank = g_lastVblank - offset = " << g_lastVblank << " - " << offset << " = " << lastVblank << "\n";
+        }
 	uint64_t now = get_time_in_nanos();
 	uint64_t targetPoint = lastVblank + nsecInterval;
 	if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
