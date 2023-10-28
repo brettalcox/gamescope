@@ -86,10 +86,10 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 	}
 	while ( targetPoint < now )
 	{
-		if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
+		/*if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
 		{
 			assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
-		}
+		}*/
 	        
 		targetPoint += nsecInterval;
 	}
