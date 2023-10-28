@@ -216,7 +216,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		VBlankTimeInfo_t time_info =
 		{
-			.target_vblank_time = targetPoint + offset,
+			.target_vblank_time = targetPoint + offset/(2*++sleep_cycle),
 			.pipe_write_time    = get_time_in_nanos(),
 		};
 
