@@ -95,7 +95,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 	}
         
         assert(targetPoint <= targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot));
-	return targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot);
+	return targetPoint+static_cast<uint64_t>((std::lldiv( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot));
 }
 
 void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
