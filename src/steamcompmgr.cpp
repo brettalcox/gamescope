@@ -1123,8 +1123,8 @@ void sleep_until_nanos(uint64_t nanos)
 	uint64_t now = get_time_in_nanos();
 	if (now >= nanos)
 		return;
-	assert(nanos >= nanos - now);
-	assert(now >= nanos - now);
+	assert(nanos - now <= std::max(nanos,now));
+	
 	sleep_for_nanos(nanos - now);
 }
 
@@ -2673,8 +2673,7 @@ paint_all(bool async)
 			uint64_t g_SteamCompMgrVBlankTime_pipe_write_time_copied = g_SteamCompMgrVBlankTime.pipe_write_time;
 	
 			copied_g_uVblankDrawTimeNS = time_now - g_SteamCompMgrVBlankTime_pipe_write_time_copied;
-			assert(copied_g_uVblankDrawTimeNS <= time_now);
-			assert(copied_g_uVblankDrawTimeNS <= g_SteamCompMgrVBlankTime_pipe_write_time_copied);
+			assert(copied_g_uVblankDrawTimeNS <= std::max(time_now,g_SteamCompMgrVBlankTime_pipe_write_time_copied));
 			g_uVblankDrawTimeNS = copied_g_uVblankDrawTimeNS;
 		}
 		else

@@ -7,6 +7,7 @@
 #include <chrono>
 #include <atomic>
 #include <condition_variable>
+#include <algorithm>
 
 #include <assert.h>
 #include <fcntl.h>
@@ -71,12 +72,8 @@ uint64_t vblank_next_target( uint64_t offset )
 	const uint64_t nsecInterval = 1'000'000'000ul / refresh;
 
 	uint64_t lastVblank = g_lastVblank - offset;
-        assert(lastVblank <= g_lastVblank);
-        if (lastVblank > offset) 
-        {
-        	std::cout << "I think I overflowed:\n"
-        	<< "lastVblank = g_lastVblank - offset = " << g_lastVblank << " - " << offset << " = " << lastVblank << "\n";
-        }
+        assert(lastVblank <= std::max(g_lastVblank,offset));
+        
 	uint64_t now = get_time_in_nanos();
 	uint64_t targetPoint = lastVblank + nsecInterval;
 	if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )

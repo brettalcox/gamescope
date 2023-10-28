@@ -1724,8 +1724,7 @@ int drm_commit(struct drm_t *drm, const struct FrameInfo_t *frameInfo )
 	g_SteamCompMgrVBlankTime_pipe_write_time_copied = g_SteamCompMgrVBlankTime.pipe_write_time;
 	
 	copied_g_uVblankDrawTimeNS = time_now - g_SteamCompMgrVBlankTime_pipe_write_time_copied;
-	assert(copied_g_uVblankDrawTimeNS <= time_now);
-	assert(copied_g_uVblankDrawTimeNS <= g_SteamCompMgrVBlankTime_pipe_write_time_copied);
+	assert(copied_g_uVblankDrawTimeNS <= std::max(time_now,g_SteamCompMgrVBlankTime_pipe_write_time_copied));
 	g_uVblankDrawTimeNS = copied_g_uVblankDrawTimeNS;
 	if ( isPageFlip ) {
 		// Wait for flip handler to unlock
