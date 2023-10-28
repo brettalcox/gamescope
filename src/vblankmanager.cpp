@@ -202,7 +202,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 
-		uint64_t targetPoint = vblank_next_target( (offset/2) );
+		uint64_t targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
 
 		sleep_until_nanos( targetPoint );
 		if (sleep_cycle < 2)
