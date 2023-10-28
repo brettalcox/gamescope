@@ -71,7 +71,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 {
 	
 	const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
-	auto div = std::lldiv_t( 1'000'000'000ll / static_cast<long long>(refresh));
+	std::lldiv_t div = std::lldiv( 1'000'000'000ll, static_cast<long long>(refresh));
 	const uint64_t nsecInterval = static_cast<uint64_t>(div.quot);
 	
 	uint64_t lastVblank = g_lastVblank - offset;
