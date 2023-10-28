@@ -8,6 +8,7 @@
 #include <atomic>
 #include <condition_variable>
 #include <algorithm>
+#include <cstdlib>
 
 #include <assert.h>
 #include <fcntl.h>
@@ -69,13 +70,15 @@ const uint64_t g_uVBlankDrawTimeMinCompositing = 2'400'000;
 uint64_t vblank_next_target( uint64_t offset )
 {
 	const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
-	const uint64_t nsecInterval = 1'000'000'000ul / refresh;
-
+	auto div = std::lldiv_t( 1'000'000'000ll / static_cast<long long>(refresh));
+	const uint64_t nsecInterval = static_cast<uint64_t>(div.quot);
+	
 	uint64_t lastVblank = g_lastVblank - offset;
         assert(lastVblank <= std::max( static_cast<uint64_t>(g_lastVblank),offset));
         
 	uint64_t now = get_time_in_nanos();
 	uint64_t targetPoint = lastVblank + nsecInterval;
+	uint64_t copy_targetPoint = targetPoint;
 	if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
 	{
 		assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
@@ -90,7 +93,7 @@ uint64_t vblank_next_target( uint64_t offset )
 		targetPoint += nsecInterval;
 	}
         
-	return targetPoint;
+	return targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot);
 }
 
 void vblankThreadRun( void )
