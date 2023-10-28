@@ -67,8 +67,9 @@ const uint64_t g_uVBlankDrawTimeMinCompositing = 2'400'000;
 
 //#define VBLANK_DEBUG
 
-uint64_t vblank_next_target( uint64_t offset )
+uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_next_target( uint64_t offset )
 {
+	
 	const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
 	auto div = std::lldiv_t( 1'000'000'000ll / static_cast<long long>(refresh));
 	const uint64_t nsecInterval = static_cast<uint64_t>(div.quot);
@@ -97,7 +98,7 @@ uint64_t vblank_next_target( uint64_t offset )
 	return targetPoint+(std::ldiv_t( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot);
 }
 
-void vblankThreadRun( void )
+void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
 {
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
 
