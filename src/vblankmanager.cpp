@@ -79,12 +79,14 @@ uint64_t vblank_next_target( uint64_t offset )
 		assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
 	}
 	while ( targetPoint < now )
+	{
 		if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
 		{
 			assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
 		}
 	        
 		targetPoint += nsecInterval;
+	}
         
 	return targetPoint;
 }

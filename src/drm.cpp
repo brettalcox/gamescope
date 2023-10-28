@@ -13,6 +13,7 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <poll.h>
+#include <assert.h>
 
 extern "C" {
 #include <wlr/types/wlr_buffer.h>
