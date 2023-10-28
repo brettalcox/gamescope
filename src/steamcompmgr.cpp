@@ -141,7 +141,7 @@ uint32_t g_reshade_technique_idx = 0;
 uint64_t timespec_to_nanos(struct timespec& spec)
 {
 	assert(spec.tv_sec * 1'000'000'000ul == static_cast<uint64_t>(spec.tv_sec)*1'000'000'000ul);
-	assert(spec.tv_nsec <= spec.tv_sec * 1'000'000'000ul + spec.tv_nsec);
+	assert( static_cast<long unsigned int> (spec.tv_nsec) <= spec.tv_sec * 1'000'000'000ul + spec.tv_nsec);
 	return spec.tv_sec * 1'000'000'000ul + spec.tv_nsec;
 }
 
