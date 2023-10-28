@@ -72,7 +72,7 @@ uint64_t vblank_next_target( uint64_t offset )
 	const uint64_t nsecInterval = 1'000'000'000ul / refresh;
 
 	uint64_t lastVblank = g_lastVblank - offset;
-        assert(lastVblank <= std::max(g_lastVblank,offset));
+        assert(lastVblank <= std::max( static_cast<uint64_t>(g_lastVblank),offset));
         
 	uint64_t now = get_time_in_nanos();
 	uint64_t targetPoint = lastVblank + nsecInterval;
