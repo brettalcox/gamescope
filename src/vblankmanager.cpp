@@ -221,6 +221,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
+			int64_t diff;
 			uint64_t prev = readCycleCount();
 			do
 			{
@@ -229,7 +230,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 #else
 				_mm_pause();
 #endif
-				int64_t diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
+				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
 				if ( diff < 0)
 				{
 					continue; // in case tsc counter resets or something
