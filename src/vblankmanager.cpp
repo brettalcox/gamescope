@@ -201,22 +201,27 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastDrawTime = drawTime;
 		lastOffset = offset;
 #endif
-		if ((offset/(2*sleep_cycle))<4'000'000l)
+		uint64_t targetPoint;
+		if ((offset/(2*sleep_cycle))<2'000'000l)
 		{
+			_mm_pause()
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
-			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle));
+			<< "\n"
+			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle)) << "\n";
+		}
+		else
+			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
+
+			sleep_until_nanos( targetPoint );
 		}
 		
-		uint64_t targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
-
-		sleep_until_nanos( targetPoint );
 		if (sleep_cycle < 2)
 		{
 			continue;
 		}
 		VBlankTimeInfo_t time_info =
 		{
-			.target_vblank_time = targetPoint + offset/(2*++sleep_cycle),
+			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
 			.pipe_write_time    = get_time_in_nanos(),
 		};
 
