@@ -212,11 +212,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if ((offset/(2*sleep_cycle))*(refresh)/60 <1'200'000l && prev_evaluation > (offset/(2*sleep_cycle)))
+		if ((offset/(2*sleep_cycle)) < 1'000'000l/((refresh)/60) && prev_evaluation > (offset/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
-			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle)) << "\n";
+			<< "(offset/(2*sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 			uint64_t prev = __rdtsc();
 			do
 			{
@@ -226,16 +226,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				_mm_pause();
 #endif
 			}
-			while ((__rdtsc() - prev) < ((refresh)/60)*offset/(2*sleep_cycle));
+			while ((__rdtsc() - prev) < offset/(2*sleep_cycle));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
-			prev_evaluation=((refresh)/60)*(offset/(2*sleep_cycle));
+			prev_evaluation=(offset/(2*sleep_cycle));
 		}
 		else
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target( ((refresh)/60)*(offset/(2*sleep_cycle)) );
+			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
@@ -266,7 +266,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( ((offset + 1'000'000)/sleep_cycle)*(refresh)/60 );
+			sleep_for_nanos( ((offset + 1'000'000)/sleep_cycle) );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
