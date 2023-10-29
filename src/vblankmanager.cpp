@@ -218,7 +218,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if (  ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)) < 1'000'000l && prev_evaluation > ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)))
+		if (  ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nOutputRefresh))/(2*sleep_cycle)) < 1'000'000l && prev_evaluation > ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nOutputRefresh))/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
@@ -245,16 +245,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				
 				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
 			}
-			while ( static_cast<uint64_t> (res) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
+			while ( static_cast<uint64_t> (res) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nOutputRefresh))/(2*sleep_cycle)));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
-			prev_evaluation=((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle));
+			prev_evaluation=((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nOutputRefresh))/(2*sleep_cycle));
 		}
 		else
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target( ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)) );
+			targetPoint = vblank_next_target( ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nOutputRefresh))/(2*sleep_cycle)) );
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
