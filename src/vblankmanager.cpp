@@ -115,6 +115,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const uint64_t range = g_uVBlankRateOfDecayMax;
 	uint8_t sleep_cycle = 0;
 	bool slept=false;
+	uint64_t prev_evaluation = 0;
 	while ( true )
 	{
 		sleep_cycle++;
@@ -210,7 +211,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if ((offset/(2*sleep_cycle))<2'000'000l)
+		if ((offset/(2*sleep_cycle))<1'200'000l && prev_evaluation != (offset/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
@@ -227,6 +228,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			while ((__rdtsc() - prev) < offset/(2*sleep_cycle));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
+			prev_evaluation=(offset/(2*sleep_cycle));
 		}
 		else
 		{
@@ -236,6 +238,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
+			prev_evaluation=0;
 		}
 		
 		if (sleep_cycle < 2)
