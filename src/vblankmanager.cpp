@@ -264,6 +264,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		{
 			sleep_for_nanos( (offset + 1'000'000)/sleep_cycle );
 		}
+		else
+		{
+#ifdef __GNUC__			
+			__builtin_ia32_pause();
+#else
+			_mm_pause();
+#endif		
+		}
 		sleep_cycle=0;
 		slept=false;
 	}
