@@ -145,7 +145,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 		uint64_t offset;
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
-		
+		uint64_t drawslice=0;
 		if ( !bVRR )
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
@@ -156,7 +156,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			if ( g_bCurrentlyCompositing )
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
 			
-			uint64_t drawslice=0;
+			
 			// This is a rolling average when drawTime < rollingMaxDrawTime,
 			// and a a max when drawTime > rollingMaxDrawTime.
 			// This allows us to deal with spikes in the draw buffer time very easily.
