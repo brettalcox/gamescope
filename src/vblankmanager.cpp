@@ -222,6 +222,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "\n"
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 			int64_t diff;
+			long long res;
 			uint64_t prev = readCycleCount();
 			do
 			{
@@ -236,7 +237,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 					continue; // in case tsc counter resets or something
 				}
 				
-				long long res = llroundl(static_cast<long double>(diff) * g_nsPerTick);
+				res = llroundl(static_cast<long double>(diff) * g_nsPerTick);
 			}
 			while ( static_cast<uint64_t> (res) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
 			slept=false;
