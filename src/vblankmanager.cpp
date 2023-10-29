@@ -212,7 +212,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if ((offset/(2*sleep_cycle)) < 1'000'000l/((refresh)/60) && prev_evaluation > (offset/(2*sleep_cycle)))
+		if ((offset/(2*sleep_cycle)) < 1'000'000l && prev_evaluation > (offset/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
