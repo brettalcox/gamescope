@@ -412,5 +412,5 @@ double getNsPerTick(void) {
   res = res*minTicks;
   printf ("Measured granularity = %llu tick%s => %sz, %s\n",
           (unsigned long long)minTicks, minTicks != 1 ? "s": "", formatSI(1./res,9,'H').c_str(), formatSI(res,9,'s').c_str());
-  return res;
+  return static_cast<long double>(res)*1'000'000'000;
 }
