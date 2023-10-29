@@ -235,7 +235,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}
 		
-		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + redZone && prev_evaluation > ((offset*( (reset)/g_nOutputRefresh))/(2*sleep_cycle)))
+		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + redZone && prev_evaluation > ((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
