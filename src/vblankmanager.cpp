@@ -263,11 +263,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				check_this = static_cast<long double>(diff) * g_nsPerTick;
 				
 				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
-				if (std::fpclassify(check_this) == FPE_FLTOVF)
+				if (std::fpclassify(check_this) == FP_INFINITE)
 				{
 					break;
 				}
 				std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
+				std::cout << static_cast<uint64_t> (res) " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
 			while ( static_cast<uint64_t> (res) < ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)));
 			slept=false;
