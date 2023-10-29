@@ -268,7 +268,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			skipped_sleep_after_vblank=0;
 			sleep_for_nanos( ((offset + 1'000'000)/sleep_cycle)*(refresh)/60 );
 		}
-		else if (skipped_sleep_after_vblank < 20)
+		else if (skipped_sleep_after_vblank < 3)
 		{
 #ifdef __GNUC__			
 			__builtin_ia32_pause();
