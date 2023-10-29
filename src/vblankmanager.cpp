@@ -130,6 +130,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
 
 	const long double g_nsPerTick = static_cast<long double>(getNsPerTick());
+	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
 	while ( true )
 	{
@@ -269,8 +270,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				{
 					break;
 				}
-				std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
-				std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
+				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
+				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
 			while ( static_cast<uint64_t> (res) < ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)));
 			slept=false;
