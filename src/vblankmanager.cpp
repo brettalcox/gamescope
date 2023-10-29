@@ -105,7 +105,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 
 void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
 {
-	const double g_nsPerTick=getNsPerTick();
+	const long double g_nsPerTick = static_cast<long double>(getNsPerTick());
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
 
 	// Start off our average with our starting draw time.
@@ -237,7 +237,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				}
 				
 			}
-			while ( static_cast<uint64_t> (llround(static_cast<double>(diff) * g_nsPerTick)) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
+			while ( static_cast<uint64_t> (llround(static_cast<long double>(diff) * g_nsPerTick)) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 			prev_evaluation=((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle));
