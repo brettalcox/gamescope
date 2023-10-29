@@ -115,7 +115,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const uint64_t range = g_uVBlankRateOfDecayMax;
 	uint8_t sleep_cycle = 0;
 	bool slept=false;
-	uint64_t prev_evaluation = 0;
+	uint64_t prev_evaluation = INT_MAX;
 	while ( true )
 	{
 		sleep_cycle++;
