@@ -9,6 +9,8 @@
 #include <condition_variable>
 #include <algorithm>
 #include <cstdlib>
+#include <cfloat>
+#include <cmath>
 
 #include <assert.h>
 #include <fcntl.h>
@@ -223,9 +225,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 			int64_t diff;
 			long long res;
+			long double check_this = 0;
 			uint64_t prev = readCycleCount();
 			do
 			{
+				res = INT_MAX;
 #ifdef __GNUC__			
 				__builtin_ia32_pause();
 #else
@@ -237,7 +241,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 					continue; // in case tsc counter resets or something
 				}
 				
-				res = llroundl(static_cast<long double>(diff) * g_nsPerTick);
+				check_this = static_cast<long double>(diff) * g_nsPerTick;
+				
+				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
 			}
 			while ( static_cast<uint64_t> (res) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
 			slept=false;
