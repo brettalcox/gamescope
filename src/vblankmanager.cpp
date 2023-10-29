@@ -207,9 +207,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
 			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle)) << "\n";
+#ifdef __GNUC__			
+			__builtin_ia32_pause();
+#else
 			_mm_pause();
+#endif
 		}
 		else
+		{
 			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
 
 			sleep_until_nanos( targetPoint );
