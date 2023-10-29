@@ -27,6 +27,13 @@
 #include "vr_session.hpp"
 #endif
 
+
+#ifdef _MSC_VER // https://stackoverflow.com/a/51907425
+#include <intrin.h>
+#else
+#include <x86intrin.h>
+#endif
+
 static int g_vblankPipe[2];
 
 std::atomic<uint64_t> g_lastVblank;
@@ -208,11 +215,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
 			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle)) << "\n";
+			uint64_t prev = __rdtsc();
+			do
+			{
 #ifdef __GNUC__			
-			__builtin_ia32_pause();
+				__builtin_ia32_pause();
 #else
-			_mm_pause();
+				_mm_pause();
 #endif
+			}
+			while ((__rdtsc() - prev) < offset/(2*sleep_cycle))
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 		}
