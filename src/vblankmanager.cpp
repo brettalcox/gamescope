@@ -289,6 +289,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 #endif		
 			skipped_sleep_after_vblank++;
 		}
+		else if (slept)
+		{
+			prev_evaluation=INT_MAX;
+		}
 		sleep_cycle=0;
 		slept=false;
 	}
