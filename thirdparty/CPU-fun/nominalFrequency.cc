@@ -369,7 +369,7 @@ static uint64_t measureClockGranularity() {
   return delta;
 }
 
-double getNsPerTick(void) {
+long double getNsPerTick(void) {
 #if (LOMP_TARGET_ARCH_AARCH64)
   double res = readHWTickTime();
   

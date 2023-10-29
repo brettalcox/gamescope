@@ -129,7 +129,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
 		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
 
-	const long double g_nsPerTick = static_cast<long double>(getNsPerTick());
+	const long double g_nsPerTick = getNsPerTick();
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
 	while ( true )
