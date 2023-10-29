@@ -212,6 +212,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 #else
 			_mm_pause();
 #endif
+			targetPoint = vblank_next_target( offset );
 		}
 		else
 		{
@@ -226,6 +227,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		VBlankTimeInfo_t time_info =
 		{
+//			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
 			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
 			.pipe_write_time    = get_time_in_nanos(),
 		};
@@ -241,7 +243,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		
 		// Get on the other side of it now
-		sleep_for_nanos( offset/8 + 1'000'000 );
+		//sleep_for_nanos( offset/8 + 1'000'000 );
 		sleep_cycle=0;
 	}
 }
