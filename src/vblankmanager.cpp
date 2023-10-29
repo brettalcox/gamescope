@@ -125,9 +125,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	bool slept=false;
 	uint64_t prev_evaluation = INT_MAX;
 	uint32_t skipped_sleep_after_vblank=0;
-	const long double g_nsPerTick;
+	
 	auto handle = std::async(std::launch::async, getFactor);
-	g_nsPerTick = handle.get();
+	const long double g_nsPerTick = handle.get();
 	
 	while ( true )
 	{
