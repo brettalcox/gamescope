@@ -28,7 +28,7 @@
 #endif
 
 
-#include "../third-party/CPU-fun/nominalFrequency.cc"
+#include "nominalFrequency.cc"
 
 static int g_vblankPipe[2];
 
