@@ -139,11 +139,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
 			
-			uint64_t drawTime = g_uVblankDrawTimeNS;
+			uint64_t drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
 			
 			
 			if ( g_bCurrentlyCompositing )
-				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing.load(std::memory_order_acquire));
+				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
 			
 			
 			// This is a rolling average when drawTime < rollingMaxDrawTime,
