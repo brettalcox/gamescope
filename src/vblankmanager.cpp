@@ -236,8 +236,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 					continue; // in case tsc counter resets or something
 				}
 				
+				long long res = llroundl(static_cast<long double>(diff) * g_nsPerTick);
 			}
-			while ( static_cast<uint64_t> (llround(static_cast<long double>(diff) * g_nsPerTick)) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
+			while ( static_cast<uint64_t> (res) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 			prev_evaluation=((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle));
