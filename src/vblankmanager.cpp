@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <mutex>
 #include <thread>
+#include <future>
 #include <vector>
 #include <chrono>
 #include <atomic>
@@ -103,7 +104,12 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 	return targetPoint+static_cast<uint64_t>((std::lldiv( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot));
 }
 
-
+long double __attribute__((optimize("-fno-unsafe-math-optimizations") )) getFactor(void)
+{
+	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
+		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
+	return static_cast<long double>(getNsPerTick());
+}
 
 void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
 {
@@ -117,7 +123,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	bool slept=false;
 	uint64_t prev_evaluation = INT_MAX;
 	uint32_t skipped_sleep_after_vblank=0;
-	const long double g_nsPerTick = static_cast<long double>(getNsPerTick());
+	const long double g_nsPerTick;
+	auto handle = std::async(std::launch::async, getFactor);
+	g_nsPerTick = handle.get();
 	
 	while ( true )
 	{
