@@ -28,11 +28,7 @@
 #endif
 
 
-#ifdef _MSC_VER // https://stackoverflow.com/a/51907425
-#include <intrin.h>
-#else
-#include <x86intrin.h>
-#endif
+#include "../third-party/CPU-fun/nominalFrequency.cc"
 
 static int g_vblankPipe[2];
 
@@ -105,8 +101,11 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 	return targetPoint+static_cast<uint64_t>((std::lldiv( static_cast<long>(targetPoint-copy_targetPoint)*div.rem, nsecInterval).quot));
 }
 
+
+
 void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
 {
+	const double g_nsPerTick=getNsPerTick();
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
 
 	// Start off our average with our starting draw time.
@@ -217,12 +216,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if ((offset/(2*sleep_cycle)) < 1'000'000l && prev_evaluation > (offset/(2*sleep_cycle)))
+		if (  ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)) < 1'000'000l && prev_evaluation > ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
-			<< "(offset/(2*sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
-			uint64_t prev = __rdtsc();
+			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
+			uint64_t prev = readCycleCount();
 			do
 			{
 #ifdef __GNUC__			
@@ -231,16 +230,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				_mm_pause();
 #endif
 			}
-			while ((__rdtsc() - prev) < offset/(2*sleep_cycle));
+			while ( static_cast<uint64_t> (static_cast<double>( (readCycleCount() - prev)) * g_nsPerTick) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
-			prev_evaluation=(offset/(2*sleep_cycle));
+			prev_evaluation=((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle));
 		}
 		else
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
+			targetPoint = vblank_next_target( ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)) );
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
