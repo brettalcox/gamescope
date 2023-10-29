@@ -224,7 +224,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				_mm_pause();
 #endif
 			}
-			while ((__rdtsc() - prev) < offset/(2*sleep_cycle))
+			while ((__rdtsc() - prev) < offset/(2*sleep_cycle));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 		}
