@@ -229,8 +229,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 #else
 				_mm_pause();
 #endif
+				int64_t diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
+				if ( diff < 0)
+				{
+					continue; // in case tsc counter resets or something
+				}
+				
 			}
-			while ( static_cast<uint64_t> (static_cast<double>( (readCycleCount() - prev)) * g_nsPerTick) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
+			while ( static_cast<uint64_t> (llround(static_cast<double>(diff) * g_nsPerTick)) < ((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle)));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 			prev_evaluation=((offset*( (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)/g_nNestedRefresh))/(2*sleep_cycle));
