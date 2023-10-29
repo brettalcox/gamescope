@@ -231,9 +231,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		else
 		{
 			slept=true;
+			
 			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
 
 			sleep_until_nanos( targetPoint );
+			targetPoint = vblank_next_target(offset);
 		}
 		
 		if (sleep_cycle < 2)
