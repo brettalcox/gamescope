@@ -107,6 +107,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 	const uint64_t range = g_uVBlankRateOfDecayMax;
 	uint8_t sleep_cycle = 0;
+	bool slept=false;
 	while ( true )
 	{
 		sleep_cycle++;
@@ -212,10 +213,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 #else
 			_mm_pause();
 #endif
+			slept=false;
 			targetPoint = vblank_next_target( offset );
 		}
 		else
 		{
+			slept=true;
 			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
 
 			sleep_until_nanos( targetPoint );
@@ -243,8 +246,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		
 		// Get on the other side of it now
-		//sleep_for_nanos( offset/8 + 1'000'000 );
+		if (!slept)
+		{
+			sleep_for_nanos( (offset + 1'000'000)/sleep_cycle );
+		}
 		sleep_cycle=0;
+		slept=false;
 	}
 }
 
