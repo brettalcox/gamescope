@@ -232,18 +232,18 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if ( ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice * drawslice)
+		/*if ( ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice * drawslice)
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
-		}
+		}*/
 		
 		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice && prev_evaluation > ((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
 		{
-			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
+			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
-			<< "busy waiting :DDD -- (offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
+			<< "busy waiting :DDD -- (offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";*/
 			int64_t diff;
 			long long res;
 			long double check_this = 0;
