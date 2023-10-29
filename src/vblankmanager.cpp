@@ -139,7 +139,6 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
 			
-			uint64_t drawTime;
 			uint64_t drawTime = g_uVblankDrawTimeNS;
 			
 			
