@@ -116,6 +116,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	uint8_t sleep_cycle = 0;
 	bool slept=false;
 	uint64_t prev_evaluation = INT_MAX;
+	uint32_t skipped_sleep_after_vblank=0;
 	while ( true )
 	{
 		sleep_cycle++;
@@ -264,9 +265,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		// Get on the other side of it now
 		if (!slept)
 		{
+			skipped_sleep_after_vblank=0;
 			sleep_for_nanos( ((offset + 1'000'000)/sleep_cycle)*(refresh)/60 );
 		}
-		else
+		else if (skipped_sleep_after_vblank < 1000)
 		{
 #ifdef __GNUC__			
 			__builtin_ia32_pause();
@@ -275,6 +277,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			_mm_pause();
 			_mm_pause();
 #endif		
+			skipped_sleep_after_vblank++;
 		}
 		sleep_cycle=0;
 		slept=false;
