@@ -156,7 +156,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			if ( g_bCurrentlyCompositing )
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
 			
-			
+			uint64_t drawslice=0;
 			// This is a rolling average when drawTime < rollingMaxDrawTime,
 			// and a a max when drawTime > rollingMaxDrawTime.
 			// This allows us to deal with spikes in the draw buffer time very easily.
@@ -170,6 +170,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime = drawTime;
 			else
 			{
+				drawslice= ( range - alpha ) * drawTime;
 				assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
 				assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
 				
@@ -228,14 +229,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		lastOffset = offset;
 #endif
 		uint64_t targetPoint;
-		if ( ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + ( range - alpha ) * drawTime * ( range - alpha ) * drawTime)
+		if ( ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice * drawslice)
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}
 		
-		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + ( range - alpha ) * drawTime && prev_evaluation > ((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
+		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice && prev_evaluation > ((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
 		{
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
