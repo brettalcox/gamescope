@@ -256,17 +256,20 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
 				if ( diff < 0)
 				{
+					std::cout << "oh noes\n";
 					continue; // in case tsc counter resets or something
 				}
 				
 				check_this = static_cast<long double>(diff) * g_nsPerTick;
 				
 				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
+				std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 			}
 			while ( static_cast<uint64_t> (res) < ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)));
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 			prev_evaluation=((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle));
+			std::cout << "exited busy wait loop\n";
 		}
 		else
 		{
