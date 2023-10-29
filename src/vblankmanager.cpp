@@ -177,8 +177,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			// Clamp our max time to half of the vblank if we can.
 			rollingMaxDrawTime = std::min( rollingMaxDrawTime, nsecInterval - redZone );
 
-			g_uRollingMaxDrawTime = rollingMaxDrawTime;
-
+			if (sleep_cycle > 1)
+			{
+				g_uRollingMaxDrawTime = rollingMaxDrawTime;
+			}
 			offset = rollingMaxDrawTime + redZone;
 			assert(offset > rollingMaxDrawTime);
 			assert(offset > redZone);
