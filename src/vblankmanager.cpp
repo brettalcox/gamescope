@@ -266,7 +266,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( ((offset + 1'000'000)/sleep_cycle) );
+			sleep_for_nanos( (offset + 1'000'000) );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
