@@ -204,10 +204,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		uint64_t targetPoint;
 		if ((offset/(2*sleep_cycle))<2'000'000l)
 		{
-			_mm_pause()
 			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
 			<< "(offset/(2*sleep_cycle)) = " << (offset/(2*sleep_cycle)) << "\n";
+			_mm_pause();
 		}
 		else
 			targetPoint = vblank_next_target( (offset/(2*sleep_cycle)) );
