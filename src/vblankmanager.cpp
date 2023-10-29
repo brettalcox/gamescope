@@ -106,12 +106,12 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 
 #include <sys/prctl.h>
 #include <linux/capability.h>
-long double __attribute__((optimize("-fno-unsafe-math-optimizations") )) getFactor(void)
-{
-	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
-		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
-	return static_cast<long double>(getNsPerTick());
-}
+//long double __attribute__((optimize("-fno-unsafe-math-optimizations") )) getFactor(void)
+//{
+//	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
+//		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
+//	return static_cast<long double>(getNsPerTick());
+//}
 
 void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
 {
@@ -126,8 +126,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	uint64_t prev_evaluation = INT_MAX;
 	uint32_t skipped_sleep_after_vblank=0;
 	
-	auto handle = std::async(std::launch::async, getFactor);
-	const long double g_nsPerTick = handle.get();
+	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
+		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
+
+	const long double g_nsPerTick = static_cast<long double>(getNsPerTick());
 	
 	while ( true )
 	{
