@@ -252,9 +252,23 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			{
 				res = INT_MAX;
 #ifdef __GNUC__			
+# if !(LOMP_TARGET_ARCH_X86_64)
+				__sync_synchronize(); //close enough to a pause intrinsic
+				__sync_synchronize();
+				__sync_synchronize();
+# else	
 				__builtin_ia32_pause();
+# endif
 #else
+# if !(LOMP_TARGET_ARCH_X86_64)
+#  if __has_builtin(__sync_synchronize)
+				__sync_synchronize(); //close enough to a pause intrinsic
+				__sync_synchronize();
+				__sync_synchronize();
+#  endif
+# else
 				_mm_pause();
+# endif	
 #endif
 				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
 				if ( diff < 0)
@@ -318,12 +332,29 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
-#ifdef __GNUC__			
+#ifdef __GNUC__
+# if !(LOMP_TARGET_ARCH_X86_64)
+			__sync_synchronize();
+			__sync_synchronize();
+			__sync_synchronize();
+			__sync_synchronize();
+# else	
 			__builtin_ia32_pause();
 			__builtin_ia32_pause();
+# endif
 #else
-			_mm_pause();
-			_mm_pause();
+# if !(LOMP_TARGET_ARCH_X86_64)
+#  if __has_builtin(__sync_synchronize)
+				__sync_synchronize(); //close enough to a pause intrinsic
+				__sync_synchronize();
+				__sync_synchronize();
+				__sync_synchronize();
+#  endif
+# else
+				_mm_pause();
+				_mm_pause();
+
+# endif
 #endif		
 			skipped_sleep_after_vblank++;
 		}
