@@ -288,11 +288,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 			offset = 1'000'000 + redZone;
 		}
-
+		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
 #ifdef VBLANK_DEBUG
 		// Debug stuff for logging missed vblanks
 		static uint64_t vblankIdx = 0;
-		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
+		
 		static uint64_t lastOffset = g_uVblankDrawTimeNS + redZone;
 
 		if ( sleep_cycle > 1 && (vblankIdx++ % 300 == 0 || drawTime > lastOffset) )
@@ -310,8 +310,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				offset / 1'000'000.0 );
 		}
 
-		lastDrawTime = drawTime;
-		lastOffset = offset;
+
 #endif
 		uint64_t targetPoint;
 		/*if ( ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice * drawslice)
@@ -410,7 +409,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + 1'000'000 );
+			sleep_for_nanos( (offset) + 1'000'000 + std::max(lastDrawTime-drawTime, 0)*refresh/60 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -457,7 +456,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + 1'000'000);		
+			while ( static_cast<uint64_t> (res) < offset + 1'000'000 + std::max(lastDrawTime-drawTime, 0)*refresh/60);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
@@ -466,6 +465,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}*/
 		sleep_cycle=0;
 		slept=false;
+		lastDrawTime = drawTime;
+		lastOffset = offset;
 	}
 }
 
