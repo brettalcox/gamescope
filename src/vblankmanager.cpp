@@ -410,7 +410,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + static_cast<uint64_t>(llroundl(static_cast<double>(1'000'000) * vblank_adj_factor) ));
+			sleep_for_nanos( (offset) + 1'000'000 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -457,7 +457,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + static_cast<uint64_t>(llroundl(static_cast<double>(1'000'000) * vblank_adj_factor)));		
+			while ( static_cast<uint64_t> (res) < offset + 1'000'000);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
