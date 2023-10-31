@@ -146,7 +146,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			? g_uVblankDrawBufferRedZoneNS
 			: ( g_uVblankDrawBufferRedZoneNS * 60 * nsecToSec ) / ( refresh * nsecToSec );
 		const double vblank_adj_factor = 60.0 / static_cast<double>((std::max(refresh,g_nOutputRefresh)));
-		
+		uint64_t drawTime;
 		uint64_t offset;
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		uint64_t drawslice=0;
@@ -154,7 +154,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
 			
-			uint64_t drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
+			drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
 			
 			
 			if ( g_bCurrentlyCompositing )
