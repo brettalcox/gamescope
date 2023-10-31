@@ -215,7 +215,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
 		static uint64_t lastOffset = g_uVblankDrawTimeNS + redZone;
 
-		if ( vblankIdx++ % 300 == 0 || drawTime > lastOffset )
+		if ( sleep_cycle > 1 && (vblankIdx++ % 300 == 0 || drawTime > lastOffset) )
 		{
 			if ( drawTime > lastOffset )
 				fprintf( stderr, " !! missed vblank " );
