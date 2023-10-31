@@ -145,7 +145,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		const uint64_t redZone = screen_type == DRM_SCREEN_TYPE_INTERNAL
 			? g_uVblankDrawBufferRedZoneNS
 			: ( g_uVblankDrawBufferRedZoneNS * 60 * nsecToSec ) / ( refresh * nsecToSec );
-		const uint32_t vblank_adj_factor = 60 / (std::max(refresh,g_nOutputRefresh));
+		const double vblank_adj_factor = 60.0 / static_cast<double>((std::max(refresh,g_nOutputRefresh)));
 		
 		uint64_t offset;
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
@@ -240,7 +240,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}*/
 		
-		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle))*vblank_adj_factor < 1'000'000l + drawslice/vblank_adj_factor && prev_evaluation > vblank_adj_factor*((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
+		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor)) && prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)))
 		{
 			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
@@ -288,17 +288,17 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)));
+			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)));
 			slept=false;
-			targetPoint = vblank_next_target( offset*vblank_adj_factor );
-			prev_evaluation=((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle));
+			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset*vblank_adj_factor)) );
+			prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))));
 			std::cout << "exited busy wait loop\n";
 		}
 		else
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target( ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) );
+			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))) );
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
@@ -311,7 +311,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		VBlankTimeInfo_t time_info =
 		{
 //			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
-			.target_vblank_time = targetPoint + offset*vblank_adj_factor
+			.target_vblank_time = targetPoint + static_cast<uint64_t> ( llroundl(offset*vblank_adj_factor)),
 			.pipe_write_time    = get_time_in_nanos(),
 		};
 
@@ -329,19 +329,24 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset + 1'000'000)*vblank_adj_factor );
+			sleep_for_nanos( (offset) + static_cast<uint64_t>( llroundl(1'000'000*vblank_adj_factor) );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
-#ifdef __GNUC__
+			int64_t diff;
+			long long res;
+			long double check_this = 0;
+			uint64_t prev = readCycleCount();
+			do
+			{
+				res = INT_MAX;
+#ifdef __GNUC__			
 # if !(LOMP_TARGET_ARCH_X86_64)
-			__sync_synchronize();
-			__sync_synchronize();
-			__sync_synchronize();
-			__sync_synchronize();
+				__sync_synchronize(); //close enough to a pause intrinsic
+				__sync_synchronize();
+				__sync_synchronize();
 # else	
-			__builtin_ia32_pause();
-			__builtin_ia32_pause();
+				__builtin_ia32_pause();
 # endif
 #else
 # if !(LOMP_TARGET_ARCH_X86_64)
@@ -349,14 +354,29 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				__sync_synchronize(); //close enough to a pause intrinsic
 				__sync_synchronize();
 				__sync_synchronize();
-				__sync_synchronize();
 #  endif
 # else
 				_mm_pause();
-				_mm_pause();
-
-# endif
-#endif		
+# endif	
+#endif
+				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
+				if ( diff < 0)
+				{
+					std::cout << "oh noes\n";
+					continue; // in case tsc counter resets or something
+				}
+				
+				check_this = static_cast<long double>(diff) * g_nsPerTick;
+				
+				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
+				if (std::fpclassify(check_this) == FP_INFINITE)
+				{
+					break;
+				}
+				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
+				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
+			}
+			while ( static_cast<uint64_t> (res) < static_cast<uint64_t>(llroundl(vblank_adj_factor)));		
 			skipped_sleep_after_vblank++;
 		}
 		else if (slept)
