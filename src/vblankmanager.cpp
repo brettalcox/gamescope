@@ -213,10 +213,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 			// If we go over half of our deadzone, be more defensive about things.
 			assert( int64_t(drawTime) >= 0);
-			if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
-				rollingMaxDrawTime = drawTime;
-			else
-			{
+			//if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
+			//	rollingMaxDrawTime = drawTime;
+			//else
+			//{
 				drawslice= ( range - alpha ) * drawTime;
 				assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
 				assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
@@ -225,7 +225,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				      &&( alpha * rollingMaxDrawTime ) <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) 
 				      ); 
 				rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
-			}
+			//}
 			drawtimes_pending[index]=drawTime;
 			
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
