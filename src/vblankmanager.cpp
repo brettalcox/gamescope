@@ -193,6 +193,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			offset = rollingMaxDrawTime + redZone;
 			assert(offset > rollingMaxDrawTime);
 			assert(offset > redZone);
+			offset = std::clamp(nsecInterval-redzone,offset,nsecInterval+redzone);
 		}
 		else
 		{
