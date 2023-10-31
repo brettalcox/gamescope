@@ -409,7 +409,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + 1'000'000 + std::max(lastDrawTime-drawTime, 0)*refresh/60 );
+			sleep_for_nanos( (offset) + 1'000'000 + std::max(lastDrawTime-drawTime, static_cast<uint64_t>(0))*refresh/60 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
