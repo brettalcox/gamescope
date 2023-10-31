@@ -145,7 +145,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		const uint64_t redZone = screen_type == DRM_SCREEN_TYPE_INTERNAL
 			? g_uVblankDrawBufferRedZoneNS
 			: ( g_uVblankDrawBufferRedZoneNS * 60 * nsecToSec ) / ( refresh * nsecToSec );
-
+		const uint32_t vblank_adj_factor = 60 / (std::max(refresh,g_nOutputRefresh));
+		
 		uint64_t offset;
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		uint64_t drawslice=0;
@@ -239,7 +240,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}*/
 		
-		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice && prev_evaluation > ((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
+		if (  ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle))*vblank_adj_factor < 1'000'000l + drawslice/vblank_adj_factor && prev_evaluation > vblank_adj_factor*((offset*( (refresh)/g_nOutputRefresh))/(2*sleep_cycle)))
 		{
 			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
@@ -289,7 +290,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			}
 			while ( static_cast<uint64_t> (res) < ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)));
 			slept=false;
-			targetPoint = vblank_next_target( offset );
+			targetPoint = vblank_next_target( offset*vblank_adj_factor );
 			prev_evaluation=((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle));
 			std::cout << "exited busy wait loop\n";
 		}
@@ -310,7 +311,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		VBlankTimeInfo_t time_info =
 		{
 //			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
-			.target_vblank_time = targetPoint + offset,
+			.target_vblank_time = targetPoint + offset*vblank_adj_factor
 			.pipe_write_time    = get_time_in_nanos(),
 		};
 
@@ -328,7 +329,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset + 1'000'000) );
+			sleep_for_nanos( (offset + 1'000'000)*vblank_adj_factor );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
