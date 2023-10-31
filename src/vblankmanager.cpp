@@ -107,6 +107,16 @@ inline uint64_t IQM(uint64_t* a, const uint64_t n) //credit for this function: h
 
 }
 
+inline int64_t mean(uint64_t* a, const uint64_t n)
+{
+	uint64_t sum=0;
+	for (int i = 0; i < n; i++)
+	{
+		sum+=a[i];
+	}
+	return static_cast<int64_t>(sum)/static_cast<int64_t>(n);
+}
+
 uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_next_target( uint64_t offset )
 {
 	
@@ -174,6 +184,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	//uint64_t offsettimes_pending[20];
 	int index=0;
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
+	int64_t avg_mean = static_cast<int64_t>(centered_mean);
 	const uint32_t sleep_weights[2] = {75, 25};
 	while ( true )
 	{
@@ -285,6 +296,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				index=0;
 				const size_t n = 60; 
 				centered_mean = IQM(drawtimes, n);
+				avg_mean = mean(drawtimes, n); 
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
@@ -428,7 +440,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + (centered_mean + std::max( (static_cast<int64_t>(drawTime) + static_cast<int64_t>(lastDrawTime)/2)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/6 );
+			sleep_for_nanos( (offset) + (centered_mean + std::max( avg_mean-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/6 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -475,7 +487,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + (centered_mean + std::max( (static_cast<int64_t>(drawTime) + static_cast<int64_t>(lastDrawTime)/2)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/6);		
+			while ( static_cast<uint64_t> (res) < offset + (centered_mean + std::max(avg_mean-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/6);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
