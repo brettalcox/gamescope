@@ -74,6 +74,34 @@ const uint64_t g_uVBlankDrawTimeMinCompositing = 2'400'000;
 
 #define VBLANK_DEBUG
 
+inline uint64_t median(uint64_t* a, const uint64_t l, const uint64_t r) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+
+{
+
+    uint64_t n = r - l + 1;
+
+    n = (n + 1) / 2 - 1;
+
+    return n + l;
+
+}
+
+inline uint64_t IQR(uint64_t* a, const uint64_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+
+{
+
+    std::sort(a, a + n);
+
+    int mid_index = median(a, 0, n);
+
+    int Q1 = a[median(a, 0, mid_index)];
+
+    int Q3 = a[mid_index + median(a, mid_index + 1, n)];
+
+    return (Q3 - Q1);
+
+}
+
 uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_next_target( uint64_t offset )
 {
 	
@@ -140,7 +168,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	uint64_t drawtimes_pending[20];
 	//uint64_t offsettimes_pending[20];
 	int index=0;
-	uint64_t variance = 1;
+	uint64_t centered_mean = 1;
 	const uint32_t sleep_weights[2] = {75, 25};
 	while ( true )
 	{
@@ -197,8 +225,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
-			rollingMaxDrawTime = std::min( rollingMaxDrawTime, (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(variance)*vblank_adj_factor)))/2 );
-			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(variance)*vblank_adj_factor)))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(variance)*vblank_adj_factor)))/2 << "\n";
+			rollingMaxDrawTime = std::min( rollingMaxDrawTime, (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 );
+			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 << "\n";
 			if (sleep_cycle > 1)
 			{
 				g_uRollingMaxDrawTime = rollingMaxDrawTime;
@@ -231,13 +259,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			{
 				memcpy(drawtimes, drawtimes_pending, 20 * sizeof(drawtimes_pending[0]));
 				index=0;
-				const size_t sz = 20; 
-				uint64_t mean = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
+				const size_t n = 20; 
+				uint64_t centered_mean = IQR(drawtimes, n);
+				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
-				auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
+				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
       					return accumulator + ((val - mean)*(val - mean) / (sz - 1));
-    				};
-    				variance = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0, variance_func);
+    				}*/
+    				//variance = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0, variance_func);
 			}
 			
 		}
