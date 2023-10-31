@@ -228,7 +228,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			// If we go over half of our deadzone, be more defensive about things.
 				assert( int64_t(drawTime) >= 0);
 				//if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
-					rollingMaxDrawTime = drawTime;
+				//	rollingMaxDrawTime = drawTime;
 				//else
 				//{
 					drawslice= ( range - alpha ) * drawTime;
