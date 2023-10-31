@@ -168,12 +168,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	
 	uint64_t drawtimes[60] = {1};
 	//uint64_t offsettimes[20] = {1};
-	std::fill_n(drawtimes, 60, 1);
+	std::fill_n(drawtimes, 60, 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
 	//std::fill_n(offsettimes, 20, 1);
 	uint64_t drawtimes_pending[60];
 	//uint64_t offsettimes_pending[20];
 	int index=0;
-	uint64_t centered_mean = 1;
+	uint64_t centered_mean = 1'000'000'000ul / 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
 	const uint32_t sleep_weights[2] = {75, 25};
 	while ( true )
 	{
