@@ -243,7 +243,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );
 			
-			uint64_t plusOrMinus = static_cast<uint64_t>( llroundl( redZone * std::log(100*std::pow( (1/vblank_adj_factor), (2.0/3.0) ))/2.5) );
+			/*uint64_t plusOrMinus = static_cast<uint64_t>( llroundl( redZone * std::log(100*std::pow( (1/vblank_adj_factor), (2.0/3.0) ))/2.5) );
 			offset = std::clamp(nsecInterval-plusOrMinus,offset,nsecInterval+plusOrMinus);
 			fprintf( stdout, "sleep_cycle=%i after offset clamping: ", sleep_cycle );
 
@@ -252,7 +252,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				g_uVBlankRateOfDecayPercentage,
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
-				offset / 1'000'000.0 );
+				offset / 1'000'000.0 );*/
 				
 			index++;
 			if ( index >= 20 )
