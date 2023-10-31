@@ -200,10 +200,24 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
 			
 			
+			const int half_refresh = refresh/2;
+			const int64_t half_nsecInterval = 1'000'000'000ul/half_refresh
+			
+			
+			
 			if ( g_bCurrentlyCompositing )
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
+			drawtimes_pending[index]=drawTime;
+			int64_t diff_to_half = drawTime - half_nsecInterval;
+			int64_t diff_to_full = nsecInterval - drawTime;
 			
-			
+			if ( diff_to_half > diff_to_full)
+			{
+				g_uRollingMaxDrawTime=rollingMaxDrawTime=centered_mean+redZone;
+				offset=half_nsecInterval;
+			}
+			else
+			{
 			// This is a rolling average when drawTime < rollingMaxDrawTime,
 			// and a a max when drawTime > rollingMaxDrawTime.
 			// This allows us to deal with spikes in the draw buffer time very easily.
@@ -212,33 +226,37 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			// we get back into a good state and then regress again.
 
 			// If we go over half of our deadzone, be more defensive about things.
-			assert( int64_t(drawTime) >= 0);
-			//if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
-			//	rollingMaxDrawTime = drawTime;
-			//else
-			//{
-				drawslice= ( range - alpha ) * drawTime;
-				assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
-				assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
+				assert( int64_t(drawTime) >= 0);
+				//if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
+					rollingMaxDrawTime = drawTime;
+				//else
+				//{
+					drawslice= ( range - alpha ) * drawTime;
+					assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
+					assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
 				
-				assert( ( alpha * rollingMaxDrawTime )/range <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range
+					assert( ( alpha * rollingMaxDrawTime )/range <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range
 				      &&( alpha * rollingMaxDrawTime ) <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) 
 				      ); 
-				rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
-			//}
-			drawtimes_pending[index]=drawTime;
+					rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
+				//}
 			
-			// If we need to offset for our draw more than half of our vblank, something is very wrong.
-			// Clamp our max time to half of the vblank if we can.
-			rollingMaxDrawTime =  std::clamp(nsecInterval-centered_mean/4, (nsecInterval + rollingMaxDrawTime + centered_mean)/3, nsecInterval+centered_mean/4);
-			std::cout << "(nsecInterval + rollingMaxDrawTime + centered_mean)/3 = " << (nsecInterval + rollingMaxDrawTime + centered_mean)/3 << "\n";
-			if (sleep_cycle > 1)
-			{
-				g_uRollingMaxDrawTime = rollingMaxDrawTime;
-			}
-			offset = rollingMaxDrawTime + redZone;
-			assert(offset > rollingMaxDrawTime);
-			assert(offset > redZone);
+			
+			
+			
+			
+			
+				// If we need to offset for our draw more than half of our vblank, something is very wrong.
+				// Clamp our max time to half of the vblank if we can.
+				rollingMaxDrawTime =  std::clamp(nsecInterval-centered_mean/4, (nsecInterval + rollingMaxDrawTime + 2*centered_mean)/4, nsecInterval+centered_mean/4);
+				std::cout << "(nsecInterval + rollingMaxDrawTime + centered_mean)/3 = " << (nsecInterval + rollingMaxDrawTime + centered_mean)/3 << "\n";
+				if (sleep_cycle > 1)
+				{
+					g_uRollingMaxDrawTime = rollingMaxDrawTime;
+				}
+				offset = rollingMaxDrawTime + redZone;
+				assert(offset > rollingMaxDrawTime);
+				assert(offset > redZone);
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
 				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
@@ -258,7 +276,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );*/
-				
+			}
+			
 			index++;
 			if ( index >= 60 )
 			{
