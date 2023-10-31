@@ -201,7 +201,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			
 			
 			const int half_refresh = refresh/2;
-			const int64_t half_nsecInterval = 1'000'000'000ul/half_refresh
+			const int64_t half_nsecInterval = 1'000'000'000ul/half_refresh;
 			
 			
 			
