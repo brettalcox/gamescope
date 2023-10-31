@@ -312,9 +312,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)));
+			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))));
 			slept=false;
-			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset*vblank_adj_factor)) );
+			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
 			prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))));
 			//std::cout << "exited busy wait loop\n";
 		}
