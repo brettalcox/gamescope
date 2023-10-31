@@ -193,9 +193,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			offset = rollingMaxDrawTime + redZone;
 			assert(offset > rollingMaxDrawTime);
 			assert(offset > redZone);
-			if ( sleep_cycle > 1 )
-			{
-				fprintf( stdout, "before offset clamping: " );
+			fprintf( stdout, "sleep_cycle=%i before offset clamping: ", sleep_cycle );
 
 				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
 				redZone / 1'000'000.0,
@@ -203,12 +201,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );
-			}
+			
 			uint64_t plusOrMinus = static_cast<uint64_t>( llroundl( redZone * std::log(100*std::pow( (1/vblank_adj_factor), (2.0/3.0) ))/2.5) );
 			offset = std::clamp(nsecInterval-plusOrMinus,offset,nsecInterval+plusOrMinus);
-			if ( sleep_cycle > 1 )
-			{
-				fprintf( stdout, "after offset clamping: " );
+			fprintf( stdout, "sleep_cycle=%i after offset clamping: ", sleep_cycle );
 
 				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
 				redZone / 1'000'000.0,
@@ -216,7 +212,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );
-			}
+			
 		}
 		else
 		{
