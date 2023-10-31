@@ -313,7 +313,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		VBlankTimeInfo_t time_info =
 		{
 //			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
-			.target_vblank_time = targetPoint + static_cast<uint64_t> ( llroundl(offset*vblank_adj_factor)),
+			.target_vblank_time = targetPoint + offset,
 			.pipe_write_time    = get_time_in_nanos(),
 		};
 
@@ -378,7 +378,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + static_cast<uint64_t>(llroundl(static_cast<double>(1'000'000) * vblank_adj_factor * vblank_adj_factor)));		
+			while ( static_cast<uint64_t> (res) < offset + static_cast<uint64_t>(llroundl(static_cast<double>(1'000'000) * vblank_adj_factor)));		
 			skipped_sleep_after_vblank++;
 		}
 		else if (slept)
