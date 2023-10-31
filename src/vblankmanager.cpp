@@ -233,7 +233,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				const size_t sz = 20; 
 				uint64_t mean = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
-				auto variance_func = [&mean, &sz](T accumulator, const T& val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
+				auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
       					return accumulator + ((val - mean)*(val - mean) / (sz - 1));
     				};
     				variance = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0, variance_func);
