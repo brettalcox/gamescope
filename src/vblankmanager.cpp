@@ -213,8 +213,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			
 			if ( diff_to_half > diff_to_full)
 			{
-				g_uRollingMaxDrawTime=rollingMaxDrawTime=centered_mean+redZone;
-				offset=(half_nsecInterval+centered_mean)/2;
+				offset=g_uRollingMaxDrawTime=rollingMaxDrawTime=(drawTime+centered_mean)/2+redZone;
+				
 			}
 			else
 			{
