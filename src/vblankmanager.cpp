@@ -152,7 +152,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const uint64_t range = g_uVBlankRateOfDecayMax;
 	uint8_t sleep_cycle = 0;
 	bool slept=false;
-	uint64_t prev_evaluation = INT_MAX;
+	//uint64_t prev_evaluation = INT_MAX;
 	uint32_t skipped_sleep_after_vblank=0;
 	
 	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
@@ -226,7 +226,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
 			rollingMaxDrawTime = std::min( rollingMaxDrawTime, (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 );
-			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 << "\n";
+			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor))) << "\n";
 			if (sleep_cycle > 1)
 			{
 				g_uRollingMaxDrawTime = rollingMaxDrawTime;
@@ -316,7 +316,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}*/
 		
-		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor)) && prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)))
+		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor))) //&& prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)
 		{
 			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
@@ -367,7 +367,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
 			slept=false;
 			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
-			prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
+			//prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
 			//std::cout << "exited busy wait loop\n";
 		}
 		else
@@ -405,7 +405,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + static_cast<uint64_t>( llroundl(1'000'000*vblank_adj_factor) ));
+			sleep_for_nanos( (offset) + 1'000'000*vblank_adj_factor ));
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -455,10 +455,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			while ( static_cast<uint64_t> (res) < offset + static_cast<uint64_t>(llroundl(static_cast<double>(1'000'000) * vblank_adj_factor)));		
 			skipped_sleep_after_vblank++;
 		}
-		else if (slept)
+		/*else if (slept)
 		{
 			prev_evaluation=INT_MAX;
-		}
+		}*/
 		sleep_cycle=0;
 		slept=false;
 	}
