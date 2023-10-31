@@ -186,6 +186,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
 	int64_t avg_mean = static_cast<int64_t>(centered_mean);
 	const uint32_t sleep_weights[2] = {75, 25};
+	uint64_t max_drawtime=2*centered_mean;
 	while ( true )
 	{
 		sleep_cycle++;
@@ -222,9 +223,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			int64_t diff_to_half = drawTime - half_nsecInterval;
 			int64_t diff_to_full = nsecInterval - drawTime;
 			
-			if ( diff_to_half > diff_to_full)
+			if ( diff_to_half > diff_to_full+1)
 			{
-				offset=g_uRollingMaxDrawTime=rollingMaxDrawTime=(centered_mean + std::max(std::abs(avg_mean-static_cast<int64_t>(drawTime)), static_cast<int64_t>(0))*refresh/60)/2;
+				offset=g_uRollingMaxDrawTime=rollingMaxDrawTime=(centered_mean + std::max(std::abs(max_drawtime+avg_drawtime-static_cast<int64_t>(drawTime)), static_cast<int64_t>(0))*refresh/60)/4;
 				
 			}
 			else
@@ -297,6 +298,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				const size_t n = 60; 
 				centered_mean = IQM(drawtimes, n);
 				avg_mean = mean(drawtimes, n); 
+				max_drawtime = std::max_element(std::begin(drawtimes), std::end(drawtimes));
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
@@ -440,7 +442,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (centered_mean + std::max( avg_mean-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/3 );
+			sleep_for_nanos( max_drawtime/4 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -487,7 +489,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < (centered_mean + std::max(avg_mean-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/3);		
+			while ( static_cast<uint64_t> (res) < max_drawtime/4);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
