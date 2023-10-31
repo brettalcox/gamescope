@@ -456,7 +456,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + 1'000'000 + std::max(lastDrawTime-drawTime, 0)*refresh/60);		
+			while ( static_cast<uint64_t> (res) < offset + 1'000'000 + std::max(lastDrawTime-drawTime, static_cast<uint64_t>(0))*refresh/60);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
