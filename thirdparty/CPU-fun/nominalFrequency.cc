@@ -38,7 +38,7 @@
 
 // Return a formatted string after normalising the value into
 // engineering style and using a suitable unit prefix (e.g. ms, us, ns).
-std::string formatSI(double interval, int width, char unit) {
+std::string __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) formatSI(double interval, int width, char unit) {
   std::stringstream os;
 
   // Preserve accuracy for small numbers, since we only multiply and the
@@ -103,7 +103,7 @@ inline auto readCycleCount() {
 }
 #endif
 
-static double measureTSCtick() {
+static double __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) measureTSCtick() {
   // Use C++ "steady_clock" since cppreference.com recommends against
   // using hrtime.  Busy wait for 5ms based on the std::chrono clock
   // and time that with our high reolution low overhead clock.
@@ -132,7 +132,7 @@ static double measureTSCtick() {
 
 
 #if(LOMP_TARGET_ARCH_X86_64)
-[[noreturn]] static void fatalError(char const * Format, ...) {
+[[noreturn]] static void __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) fatalError(char const * Format, ...) {
   fflush(stdout);
   va_list VarArgs;
   va_start(VarArgs, Format);
@@ -296,7 +296,7 @@ static bool readHWTickTimeFromName(double * time) {
   return true;
 }
 
-static double readHWTickTime() {
+static double __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) readHWTickTime() {
   // First check whether TSC can sanely be used at all.
   if (!haveInvariantTSC()) {
     fatalError("TSC may not be invariant. Use another clock!");
@@ -321,7 +321,7 @@ static double readHWTickTime() {
 // Try to see whether the clock actually ticks at the same rate as its value is enumerated in.
 // Consider a clock whose value is enumerated in seconds, but which only changes once an hour...
 // Just because a clock has a fine interval, that doesn't mean it can measure to that level.
-static uint64_t measureClockGranularity() {
+static uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) measureClockGranularity() {
   // If the clock is very slow, this might not work...
   uint64_t delta = std::numeric_limits<uint64_t>::max();
 
@@ -369,7 +369,7 @@ static uint64_t measureClockGranularity() {
   return delta;
 }
 
-long double getNsPerTick(void) {
+long double __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) getNsPerTick(void) {
 #if (LOMP_TARGET_ARCH_AARCH64)
   double res = readHWTickTime();
   
