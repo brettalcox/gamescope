@@ -287,7 +287,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}*/
 		
-		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_factor-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor)) && prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)))
+		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor)) && prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)))
 		{
 			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
