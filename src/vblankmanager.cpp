@@ -260,7 +260,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				memcpy(drawtimes, drawtimes_pending, 20 * sizeof(drawtimes_pending[0]));
 				index=0;
 				const size_t n = 20; 
-				uint64_t centered_mean = IQR(drawtimes, n);
+				centered_mean = IQR(drawtimes, n);
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
@@ -405,7 +405,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + 1'000'000*vblank_adj_factor ));
+			sleep_for_nanos( (offset) + static_cast<uint64_t>(llroundl(static_cast<double>(1'000'000) * vblank_adj_factor) ));
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
