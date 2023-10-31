@@ -184,7 +184,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	//uint64_t offsettimes_pending[20];
 	int index=0;
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
-	int64_t avg_mean = static_cast<int64_t>(centered_mean);
+	int64_t avg_drawtime = static_cast<int64_t>(centered_mean);
 	const uint32_t sleep_weights[2] = {75, 25};
 	uint64_t max_drawtime=2*centered_mean;
 	while ( true )
@@ -297,8 +297,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				index=0;
 				const size_t n = 60; 
 				centered_mean = IQM(drawtimes, n);
-				avg_mean = mean(drawtimes, n); 
-				max_drawtime = std::max_element(std::begin(drawtimes), std::end(drawtimes));
+				avg_drawtime = mean(drawtimes, n); 
+				max_drawtime = *std::max_element(std::begin(drawtimes), std::end(drawtimes));
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
