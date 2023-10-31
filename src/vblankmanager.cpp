@@ -132,6 +132,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const long double g_nsPerTick = getNsPerTick();
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
+	uint64_t drawtimes[20] = {1};
+	//uint64_t offsettimes[20] = {1};
+	std::fill_n(drawtimes, 20, 1);
+	//std::fill_n(offsettimes, 20, 1);
+	uint64_t drawtimes_pending[20];
+	//uint64_t offsettimes_pending[20];
+	int index=0;
+	uint64_t variance = 1;
 	while ( true )
 	{
 		sleep_cycle++;
@@ -183,13 +191,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				      ); 
 				rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
 			}
-
+			drawtimes_pending[index]=drawTime;
+			
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
-			rollingMaxDrawTime = std::min( rollingMaxDrawTime, nsecInterval - redZone );
-
+			rollingMaxDrawTime = std::min( rollingMaxDrawTime, (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(variance)*vblank_adj_factor)))/2 );
+			
 			g_uRollingMaxDrawTime = rollingMaxDrawTime;
-
+			
 			offset = rollingMaxDrawTime + redZone;
 			assert(offset > rollingMaxDrawTime);
 			assert(offset > redZone);
@@ -212,6 +221,20 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );
+				
+			index++;
+			if ( index >= 20 )
+			{
+				memcpy(drawtimes, drawtimes_pending, 20 * sizeof(drawtimes_pending[0]));
+				index=0;
+				const size_t sz = 20; 
+				uint64_t mean = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
+				
+				auto variance_func = [&mean, &sz](T accumulator, const T& val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
+      					return accumulator + ((val - mean)*(val - mean) / (sz - 1));
+    				};
+    				variance = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0, variance_func);
+			}
 			
 		}
 		else
