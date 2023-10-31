@@ -71,7 +71,7 @@ std::atomic<bool> g_bCurrentlyCompositing = { false };
 // a feedback loop with our clocks. Pick a sane minimum draw time.
 const uint64_t g_uVBlankDrawTimeMinCompositing = 2'400'000;
 
-//#define VBLANK_DEBUG
+#define VBLANK_DEBUG
 
 uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_next_target( uint64_t offset )
 {
