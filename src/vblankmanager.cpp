@@ -141,6 +141,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	//uint64_t offsettimes_pending[20];
 	int index=0;
 	uint64_t variance = 1;
+	const uint32_t sleep_weights[2] = {75, 25};
 	while ( true )
 	{
 		sleep_cycle++;
@@ -286,7 +287,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
 		}*/
 		
-		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor)) && prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)))
+		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_factor-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor)) && prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)))
 		{
 			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
 			<< "\n"
@@ -334,17 +335,17 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))));
+			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
 			slept=false;
 			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
-			prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))));
+			prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
 			//std::cout << "exited busy wait loop\n";
 		}
 		else
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh))) );
+			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100*g_nOutputRefresh))) );
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
