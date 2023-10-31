@@ -409,7 +409,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + (centered_mean/2 + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/2 );
+			sleep_for_nanos( (offset) + (centered_mean/2 + drawTime + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/6 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -456,7 +456,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + (centered_mean/2 + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/2);		
+			while ( static_cast<uint64_t> (res) < offset + (centered_mean/2 + drawTime + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60)/6);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
