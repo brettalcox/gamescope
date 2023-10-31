@@ -86,7 +86,7 @@ inline uint64_t median(uint64_t* a, const uint64_t l, const uint64_t r) //credit
 
 }
 
-inline uint64_t IQR(uint64_t* a, const uint64_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+inline uint64_t IQM(uint64_t* a, const uint64_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
 
 {
 
@@ -97,8 +97,13 @@ inline uint64_t IQR(uint64_t* a, const uint64_t n) //credit for this function: h
     int Q1 = a[median(a, 0, mid_index)];
 
     int Q3 = a[mid_index + median(a, mid_index + 1, n)];
-
-    return (Q3 - Q1);
+    
+    uint64_t sum=0;
+    for (int i = Q1; i < Q3; i++)
+    {
+    	sum+=a[i];
+    }
+    return sum/(Q3 - Q1);
 
 }
 
@@ -161,11 +166,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const long double g_nsPerTick = getNsPerTick();
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
-	uint64_t drawtimes[20] = {1};
+	uint64_t drawtimes[60] = {1};
 	//uint64_t offsettimes[20] = {1};
-	std::fill_n(drawtimes, 20, 1);
+	std::fill_n(drawtimes, 60, 1);
 	//std::fill_n(offsettimes, 20, 1);
-	uint64_t drawtimes_pending[20];
+	uint64_t drawtimes_pending[60];
 	//uint64_t offsettimes_pending[20];
 	int index=0;
 	uint64_t centered_mean = 1;
@@ -226,7 +231,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
 			rollingMaxDrawTime = std::min( rollingMaxDrawTime, (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 );
-			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor))) << "\n";
+			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)*vblank_adj_factor)))/2 << "\n";
 			if (sleep_cycle > 1)
 			{
 				g_uRollingMaxDrawTime = rollingMaxDrawTime;
@@ -234,7 +239,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			offset = rollingMaxDrawTime + redZone;
 			assert(offset > rollingMaxDrawTime);
 			assert(offset > redZone);
-			fprintf( stdout, "sleep_cycle=%i before offset clamping: ", sleep_cycle );
+			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
 				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
 				redZone / 1'000'000.0,
@@ -255,12 +260,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				offset / 1'000'000.0 );*/
 				
 			index++;
-			if ( index >= 20 )
+			if ( index >= 60 )
 			{
-				memcpy(drawtimes, drawtimes_pending, 20 * sizeof(drawtimes_pending[0]));
+				memcpy(drawtimes, drawtimes_pending, 60 * sizeof(drawtimes_pending[0]));
 				index=0;
-				const size_t n = 20; 
-				centered_mean = IQR(drawtimes, n);
+				const size_t n = 60; 
+				centered_mean = IQM(drawtimes, n);
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
