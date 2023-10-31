@@ -230,7 +230,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
-			rollingMaxDrawTime =  (nsecInterval + rollingMaxDrawTime + centered_mean)/3 ;
+			rollingMaxDrawTime =  clamp(nsecInterval-centered_mean/4, nsecInterval + rollingMaxDrawTime + centered_mean, nsecInterval+centered_mean/4)/3 ;
 			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean))))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean))))/2 << "\n";
 			if (sleep_cycle > 1)
 			{
