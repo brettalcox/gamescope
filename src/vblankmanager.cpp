@@ -329,7 +329,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + static_cast<uint64_t>( llroundl(1'000'000*vblank_adj_factor) );
+			sleep_for_nanos( (offset) + static_cast<uint64_t>( llroundl(1'000'000*vblank_adj_factor) ));
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
