@@ -12,6 +12,7 @@
 #include <cstdlib>
 #include <cfloat>
 #include <cmath>
+#include <numeric>
 
 #include <assert.h>
 #include <fcntl.h>
