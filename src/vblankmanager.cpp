@@ -231,7 +231,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			// If we need to offset for our draw more than half of our vblank, something is very wrong.
 			// Clamp our max time to half of the vblank if we can.
 			rollingMaxDrawTime =  std::clamp(nsecInterval-centered_mean/4, (nsecInterval + rollingMaxDrawTime + centered_mean)/3, nsecInterval+centered_mean/4);
-			std::cout << "(nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean))))/2 = " << (nsecInterval - redZone + static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean))))/2 << "\n";
+			std::cout << "(nsecInterval + rollingMaxDrawTime + centered_mean)/3 = " << (nsecInterval + rollingMaxDrawTime + centered_mean)/3 << "\n";
 			if (sleep_cycle > 1)
 			{
 				g_uRollingMaxDrawTime = rollingMaxDrawTime;
@@ -409,7 +409,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (offset) + 1'000'000 + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(drawTime), static_cast<int64_t>(0))*refresh/60 );
+			sleep_for_nanos( (offset) + 1'000'000 + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -456,7 +456,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
 				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
-			while ( static_cast<uint64_t> (res) < offset + 1'000'000 + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(drawTime), static_cast<int64_t>(0))*refresh/60);		
+			while ( static_cast<uint64_t> (res) < offset + 1'000'000 + std::max(static_cast<int64_t>(lastDrawTime)-static_cast<int64_t>(offset), static_cast<int64_t>(0))*refresh/60);		
 			skipped_sleep_after_vblank++;
 		}
 		/*else if (slept)
