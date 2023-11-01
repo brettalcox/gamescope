@@ -261,11 +261,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				// If we need to offset for our draw more than half of our vblank, something is very wrong.
 				// Clamp our max time to half of the vblank if we can.
 				
-				std::cout << "static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime))))))) = " << static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)))))) << "\n";
+				std::cout << "static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)/10000000.0))))) = " << static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)/10000000.0))))) << "\n";
 				if (sleep_cycle > 1)
 				{
 					g_uRollingMaxDrawTime = rollingMaxDrawTime;
-					rollingMaxDrawTime =  static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime))))));
+					rollingMaxDrawTime =  static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)/10000000.0)))));
 				}
 				offset = rollingMaxDrawTime + redZone;
 				
@@ -298,6 +298,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				index=0;
 				const size_t n = 60; 
 				centered_mean = IQM(drawtimes, n);
+				
 				avg_drawtime = mean(drawtimes, n); 
 				max_drawtime = *std::max_element(std::begin(drawtimes), std::end(drawtimes));
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
