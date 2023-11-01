@@ -94,13 +94,11 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const uint16_t n) /
 
     int mid_index = med(a, 0, n);
 
-    int Q1 = a[med(a, 0, mid_index)];
+    int r1 = med(a, 0, mid_index);
 
-    int Q3 = a[mid_index + med(a, mid_index + 1, n)];
-          std::cout << "med(a, 0, mid_index) = " << med(a, 0, mid_index) << "\n"
-    	      << "Q1 = " << Q1 << "\n"
-    	      << "mid_index + med(a, mid_index + 1, n) = " << mid_index + med(a, mid_index + 1, n) << "\n"
-    	      << "Q3 = " << Q3 << "\n";
+    int r3 = std::min(mid_index + med(a, mid_index + 1, n), n);
+          std::cout << "med(a, 0, mid_index) = r1" << med(a, 0, mid_index) << "\n"
+    	      << "std::min(mid_index + med(a, mid_index + 1, n), n) = r3" << std::min(mid_index + med(a, mid_index + 1, n), n) << "\n";
     
     uint64_t sum=0;
     for (int i = Q1; i < Q3; i++)
