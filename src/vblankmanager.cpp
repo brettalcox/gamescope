@@ -163,9 +163,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 	long double g_nsPerTick = getNsPerTick();
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
-	uint16_t drawtimes[60] = {1};
-	uint16_t drawtimes_pending[60];
-	std::fill_n(drawtimes, 60, static_cast<uint16_t>(((1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)) >> 1)/500 )  );
+	uint16_t drawtimes[64] = {1};
+	uint16_t drawtimes_pending[64];
+	std::fill_n(drawtimes, 64, static_cast<uint16_t>(((1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)) >> 1)/500 )  );
 	int index=0;
 
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
@@ -210,7 +210,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			
 			if ( g_bCurrentlyCompositing )
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
-			drawtimes_pending[index] = static_cast<uint16_t>( (drawTime >> 1)/500 );
+			if (sleep_cycle < 2)
+				drawtimes_pending[index] = static_cast<uint16_t>( (drawTime >> 1)/500 );
 			
 
 			// If we go over half of our deadzone, be more defensive about things.
@@ -243,14 +244,15 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			  drawTime / 1'000'000.0,
 			  offset / 1'000'000.0 );
 
+			if (sleep_cycle > 1)
+				index++;
 			
-			index++;
-			if ( index >= 60 )
+			if ( index >= 64 )
 			{
-				memcpy(drawtimes, drawtimes_pending, 60 * sizeof(drawtimes_pending[0]));
+				memcpy(drawtimes, drawtimes_pending, 64 * sizeof(drawtimes_pending[0]));
 				index=0;
-				const uint16_t n = 60; 
-				centered_mean = clamp(2*nsecInterval/3, IQM(drawtimes, n), 5*nsecInterval/3);
+				const uint16_t n = 64; 
+				centered_mean = (centered_mean + clamp(2*nsecInterval/3, IQM(drawtimes, n), 5*nsecInterval/3))/2;
 				
 				max_drawtime = std::min( 
 					      (	
