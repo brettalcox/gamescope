@@ -194,7 +194,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		uint64_t drawTime;
 		uint64_t offset;
 		
-		
+		long long time_discount = 0;
 		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
 		
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
@@ -249,6 +249,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			
 			if ( sleep_cycle < 2 && index >= 64 )
 			{
+				time_discount=readCycleCount();
 				memcpy(drawtimes, drawtimes_pending, 64 * sizeof(drawtimes_pending[0]));
 				index=0;
 				const uint16_t n = 64; 
@@ -260,6 +261,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 					      * 500)
 					      <<1
 					, 8*nsecInterval/3);
+				time_discount=readCycleCount() - time_discount;
 			}
 			
 		}
@@ -330,7 +332,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				_mm_pause();
 # endif	
 #endif
-				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev);
+				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev)-time_discount;
 				if ( diff < 0)
 				{
 					std::cout << "oh noes\n";
@@ -358,7 +360,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100*g_nOutputRefresh))) );
+			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>((offset*refresh * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100*g_nOutputRefresh)) - static_cast<long double>(time_discount)*g_nsPerTick )));
 
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
