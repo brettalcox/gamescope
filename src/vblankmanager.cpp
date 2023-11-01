@@ -309,7 +309,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				centered_mean = clamp(2*nsecInterval/3, IQM(drawtimes, n), 5*nsecInterval/3);
 				
 				avg_drawtime = mean(drawtimes, n); 
-				max_drawtime = *std::max_element(std::begin(drawtimes), std::end(drawtimes));
+				max_drawtime = std::min(std::max(max_drawtime,*std::max_element(std::begin(drawtimes), std::end(drawtimes))), 8*nsecInterval/3) ;
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
