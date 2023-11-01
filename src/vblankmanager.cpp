@@ -247,7 +247,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			if (sleep_cycle > 1)
 				index++;
 			
-			if ( index >= 64 )
+			if ( sleep_cycle < 2 && index >= 64 )
 			{
 				memcpy(drawtimes, drawtimes_pending, 64 * sizeof(drawtimes_pending[0]));
 				index=0;
