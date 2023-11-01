@@ -239,8 +239,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 			// If we go over half of our deadzone, be more defensive about things.
 				assert( int64_t(drawTime) >= 0);
-				//if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
-				//	rollingMaxDrawTime = drawTime;
+				if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
+					rollingMaxDrawTime = drawTime;
 				//else
 				//{
 				/*	drawslice= ( range - alpha ) * drawTime;
@@ -261,7 +261,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				// If we need to offset for our draw more than half of our vblank, something is very wrong.
 				// Clamp our max time to half of the vblank if we can.
 				
-				std::cout << "static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)/10000000.0))))) = " << static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)/10000000.0))))) << "\n";
+				std::cout << "static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)/10000000.0))))) = " << static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-static_cast<long double>(rollingMaxDrawTime)/10000000.0)))) << "\n";
 				if (sleep_cycle > 1)
 				{
 					g_uRollingMaxDrawTime = rollingMaxDrawTime;
