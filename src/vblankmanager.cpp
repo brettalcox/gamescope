@@ -221,11 +221,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				
 			if (sleep_cycle > 1)
 			{	
-				long double roll = std::exp(-(.5*(static_cast<long double>(rollingMaxDrawTime)/std::sqrt(vblank_adj_factor)-static_cast<long double>(redZone)*vblank_adj_factor)/10000000.0));
+				long double roll = .95*std::exp(-((static_cast<long double>(rollingMaxDrawTime)/std::sqrt(vblank_adj_factor)-.9*static_cast<long double>(redZone)*vblank_adj_factor)/10000000.0));
 				std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
 				roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
 				std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
-				g_uRollingMaxDrawTime = rollingMaxDrawTime = (static_cast<uint64_t>(llroundl(roll)));
+				g_uRollingMaxDrawTime = rollingMaxDrawTime = (static_cast<uint64_t>(llroundl(roll)))+redZone;
 			}
 			else
 			{
