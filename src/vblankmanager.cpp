@@ -251,7 +251,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				memcpy(drawtimes, drawtimes_pending, 60 * sizeof(drawtimes_pending[0]));
 				index=0;
 				const uint16_t n = 60; 
-				centered_mean = clamp(2*nsecInterval/3, ((static_cast<uint64_t>(IQM(drawtimes, n)))*500) <<1, 5*nsecInterval/3);
+				centered_mean = clamp(2*nsecInterval/3, IQM(drawtimes, n), 5*nsecInterval/3);
 				
 				max_drawtime = std::min( 
 					      (	
