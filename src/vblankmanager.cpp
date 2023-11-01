@@ -274,7 +274,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				}
 				else
 				{
-					rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 2*( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (3*range), centered_mean + 2*std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)));
+					rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 3*( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (2*range), centered_mean + 2*std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)));
 				}
 				offset = rollingMaxDrawTime + redZone;
 				
