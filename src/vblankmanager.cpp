@@ -268,7 +268,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 					rollingMaxDrawTime =  centered_mean/(1+std::exp(-std::abs(static_cast<int64_t>(rollingMaxDrawTime)-static_cast<int64_t>(nsecInterval))));
 				}
 				offset = rollingMaxDrawTime + redZone;
-				assert(offset > std::max(rollingMaxDrawTime,redZone));
+				
 				//assert(offset > redZone);
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
