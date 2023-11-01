@@ -243,7 +243,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				//	rollingMaxDrawTime = drawTime;
 				//else
 				//{
-					drawslice= ( range - alpha ) * drawTime;
+				/*	drawslice= ( range - alpha ) * drawTime;
 					assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
 					assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
 				
@@ -251,7 +251,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				      &&( alpha * rollingMaxDrawTime ) <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) 
 				      ); 
 					rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
-				//}
+				//}*/
 			
 			
 			
