@@ -101,11 +101,11 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const uint16_t n) /
     	      << "std::min(mid_index + med(a, mid_index + 1, n), n) = r3" << std::min(mid_index + med(a, mid_index + 1, n), n) << "\n";
     
     uint64_t sum=0;
-    for (int i = Q1; i < Q3; i++)
+    for (int i = r1; i < r3; i++)
     {
     	sum += ((static_cast<uint64_t> (a[i])) * 500) << 1;
     }
-    return sum/(Q3 - Q1);
+    return sum/(r3 - r1);
 
 }
 
