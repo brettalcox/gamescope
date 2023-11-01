@@ -205,6 +205,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		uint64_t offset;
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		uint64_t drawslice=0;
+		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
 		if ( !bVRR )
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
@@ -273,7 +274,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				}
 				else
 				{
-					rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
+					rollingMaxDrawTime = std::clamp(centered_mean - std::abs(static_cast<int64_t>(lastDrawTime) - static_last<int64_t>(drawTime)), ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range, centered_mean + std::abs(static_cast<int64_t>(lastDrawTime) - static_last<int64_t>(drawTime)));
 				}
 				offset = rollingMaxDrawTime + redZone;
 				
@@ -331,7 +332,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 			offset = 1'000'000 + redZone;
 		}
-		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
+		
 #ifdef VBLANK_DEBUG
 		// Debug stuff for logging missed vblanks
 		static uint64_t vblankIdx = 0;
