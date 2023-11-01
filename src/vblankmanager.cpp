@@ -86,7 +86,7 @@ inline int __attribute__((const)) median(const uint16_t l, const uint16_t r) //c
 
 #define med(a,l,r) median(l,r)
 
-inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const uint16_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const int n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
 
 {
 
