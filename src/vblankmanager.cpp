@@ -244,7 +244,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			  drawTime / 1'000'000.0,
 			  offset / 1'000'000.0 );
 
-			if (sleep_cycle > 1)
+			if (sleep_cycle < 2)
 				index++;
 			
 			if ( sleep_cycle < 2 && index >= 64 )
