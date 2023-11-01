@@ -253,7 +253,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				
 				max_drawtime = std::min( 
 					      (	
-					  	(static_cast<uint64_t>(std::max(  static_cast<uint16_t>((max_drawtime>>1)/500), *std::max_element(std::begin(drawtimes)), std::end(drawtimes))))
+					  	(static_cast<uint64_t>(std::max(  static_cast<uint16_t>((max_drawtime>>1)/500), *std::max_element(std::begin(drawtimes), std::end(drawtimes)))))
 					      * 500)
 					      <<1
 					, 8*nsecInterval/3);
