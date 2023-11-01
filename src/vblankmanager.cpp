@@ -73,8 +73,7 @@ const uint64_t g_uVBlankDrawTimeMinCompositing = 2'400'000;
 
 #define VBLANK_DEBUG
 
-inline int median(uint16_t* a, const uint16_t l, const uint16_t r) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
-
+inline int __attribute__((const)) median(const uint16_t l, const uint16_t r) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
 {
 
     int n = static_cast<int>(r) - static_cast<int>(l) + 1;
@@ -85,17 +84,19 @@ inline int median(uint16_t* a, const uint16_t l, const uint16_t r) //credit for 
 
 }
 
-inline uint64_t IQM(uint16_t* a, const uint16_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+#define med(a,l,r) median(l,r)
+
+inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const uint16_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
 
 {
 
     std::sort(a, a + n);
 
-    int mid_index = median(a, 0, n);
+    int mid_index = med(a, 0, n);
 
-    int Q1 = a[median(a, 0, mid_index)];
+    int Q1 = a[med(a, 0, mid_index)];
 
-    int Q3 = a[mid_index + median(a, mid_index + 1, n)];
+    int Q3 = a[mid_index + med(a, mid_index + 1, n)];
     
     uint64_t sum=0;
     for (int i = Q1; i < Q3; i++)
@@ -106,21 +107,15 @@ inline uint64_t IQM(uint16_t* a, const uint16_t n) //credit for this function: h
 
 }
 
-inline int64_t mean(uint64_t* a, const uint64_t n)
-{
-	uint64_t sum=0;
-	for (int i = 0; i < n; i++)
-	{
-		sum+=a[i];
-	}
-	return static_cast<int64_t>(sum)/static_cast<int64_t>(n);
-}
-
-uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_next_target( uint64_t offset )
+#ifdef __GNUC__
+uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblank_next_target( const uint64_t offset )
+#else
+uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblank_next_target( const uint64_t offset )
+#endif
 {
 	
 	const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
-	std::lldiv_t div = std::lldiv( 1'000'000'000ll, static_cast<long long>(refresh));
+	const std::lldiv_t div = std::lldiv( 1'000'000'000ll, static_cast<long long>(refresh));
 	const uint64_t nsecInterval = static_cast<uint64_t>(div.quot);
 	
 	uint64_t lastVblank = g_lastVblank - offset;
@@ -145,8 +140,11 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 #include <sys/prctl.h>
 #include <linux/capability.h>
 
-
-void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
+#ifdef __GNUC__
+void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( void )
+#else
+void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( void )
+#endif
 {
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
 
