@@ -3,7 +3,6 @@
 #include <cstdint>
 #include <mutex>
 #include <thread>
-#include <future>
 #include <vector>
 #include <chrono>
 #include <atomic>
@@ -135,12 +134,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 		assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
 	}
 	while ( targetPoint < now )
-	{
-		/*if ( static_cast <int64_t>(targetPoint) >= 0 && static_cast<int64_t>(nsecInterval) >= 0 )
-		{
-			assert( (targetPoint + nsecInterval) >= static_cast<uint64_t>(abs(static_cast <int64_t>(targetPoint) - static_cast<int64_t>(nsecInterval))) );
-		}*/
-	        
+	{       
 		targetPoint += nsecInterval;
 	}
         
@@ -150,12 +144,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblank_nex
 
 #include <sys/prctl.h>
 #include <linux/capability.h>
-//long double __attribute__((optimize("-fno-unsafe-math-optimizations") )) getFactor(void)
-//{
-//	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
-//		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
-//	return static_cast<long double>(getNsPerTick());
-//}
+
 
 void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRun( void )
 {
@@ -167,7 +156,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const uint64_t range = g_uVBlankRateOfDecayMax;
 	uint8_t sleep_cycle = 0;
 	bool slept=false;
-	//uint64_t prev_evaluation = INT_MAX;
+
 	uint32_t skipped_sleep_after_vblank=0;
 	
 	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
@@ -177,14 +166,13 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
 	uint16_t drawtimes[60] = {1};
-	//uint64_t offsettimes[20] = {1};
+
 	std::fill_n(drawtimes, 60, static_cast<uint16_t>(((1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)) >> 1)/500 )  );
-	//std::fill_n(offsettimes, 20, 1);
+
 	uint16_t drawtimes_pending[60];
-	//uint64_t offsettimes_pending[20];
+
 	int index=0;
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
-	//int64_t avg_drawtime = static_cast<int64_t>(centered_mean);
 	const uint32_t sleep_weights[2] = {75, 25};
 	uint64_t max_drawtime=2*centered_mean;
 	while ( true )
@@ -219,45 +207,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
 			drawtimes_pending[index] = static_cast<uint16_t>( (drawTime >> 1)/500 );
 			
-			
-			//if ( diff_to_half > diff_to_full+1)
-			//{
-			//	offset=g_uRollingMaxDrawTime=rollingMaxDrawTime=(centered_mean + std::max(std::abs(static_cast<int64_t>(max_drawtime)+avg_drawtime-static_cast<int64_t>(drawTime)), static_cast<int64_t>(0))*refresh/60)/4;
-			//	
-			//}
-			//else
-			//{
-			// This is a rolling average when drawTime < rollingMaxDrawTime,
-			// and a a max when drawTime > rollingMaxDrawTime.
-			// This allows us to deal with spikes in the draw buffer time very easily.
-			// eg. if we suddenly spike up (eg. because of test commits taking a stupid long time),
-			// we will then be able to deal with spikes in the long term, even if several commits after
-			// we get back into a good state and then regress again.
 
 			// If we go over half of our deadzone, be more defensive about things.
 				assert( int64_t(drawTime) >= 0);
 				if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
 					rollingMaxDrawTime = drawTime;
-				//else
-				//{
-				/*	drawslice= ( range - alpha ) * drawTime;
-					assert( (alpha <= alpha * rollingMaxDrawTime) || (rollingMaxDrawTime==0) );
-					assert( drawTime <= ( range - alpha ) * drawTime || (drawTime == 0) );
-				
-					assert( ( alpha * rollingMaxDrawTime )/range <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range
-				      &&( alpha * rollingMaxDrawTime ) <= ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) 
-				      ); 
-					rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / range;
-				//}*/
-			
-			
-			
-			
-			
-			
-				// If we need to offset for our draw more than half of our vblank, something is very wrong.
-				// Clamp our max time to half of the vblank if we can.
-				
 				
 				if (sleep_cycle > 1)
 				{
@@ -274,7 +228,6 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				}
 				offset = rollingMaxDrawTime + redZone;
 				
-				//assert(offset > redZone);
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
 				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
@@ -283,18 +236,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );
-			
-			/*uint64_t plusOrMinus = static_cast<uint64_t>( llroundl( redZone * std::log(100*std::pow( (1/vblank_adj_factor), (2.0/3.0) ))/2.5) );
-			offset = std::clamp(nsecInterval-plusOrMinus,offset,nsecInterval+plusOrMinus);
-			fprintf( stdout, "sleep_cycle=%i after offset clamping: ", sleep_cycle );
 
-				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
-				redZone / 1'000'000.0,
-				g_uVBlankRateOfDecayPercentage,
-				rollingMaxDrawTime / 1'000'000.0,
-				drawTime / 1'000'000.0,
-				offset / 1'000'000.0 );*/
-			//}
 			
 			index++;
 			if ( index >= 60 )
@@ -304,19 +246,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				const uint16_t n = 60; 
 				centered_mean = clamp(2*nsecInterval/3, ((static_cast<uint64_t>(IQM(drawtimes, n)))*500) <<1, 5*nsecInterval/3);
 				
-				//avg_drawtime = mean(drawtimes, n); 
 				max_drawtime = std::min( 
 					      (	
 					  	(static_cast<uint64_t>(std::max(  static_cast<uint16_t>((max_drawtime>>1)/500), *std::max_element(std::begin(drawtimes)), std::end(drawtimes))))
 					      * 500)
 					      <<1
 					, 8*nsecInterval/3);
-				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
-				
-				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
-      					return accumulator + ((val - mean)*(val - mean) / (sz - 1));
-    				}*/
-    				//variance = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0, variance_func);
 			}
 			
 		}
@@ -358,18 +293,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 
 #endif
 		uint64_t targetPoint;
-		/*if ( ((offset*( (refresh/g_nOutputRefresh) ))/(2*sleep_cycle)) < 1'000'000l + drawslice * drawslice)
-		{
-			std::cout << "sleep_cycle=" << sleep_cycle << "\n"
-			<< "\n"
-			<< "(offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";
-		}*/
 		
-		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l + static_cast<uint64_t>(llroundl(static_cast<long double>(drawslice)/vblank_adj_factor))) //&& prev_evaluation+drawslice > static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh) / static_cast<long double>(2*sleep_cycle*g_nOutputRefresh)*vblank_adj_factor)
+		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l)
 		{
-			/*std::cout << "sleep_cycle=" << sleep_cycle << "\n"
-			<< "\n"
-			<< "busy waiting :DDD -- (offset/(sleep_cycle)) = " << (offset/(sleep_cycle)) << "\n";*/
 			int64_t diff;
 			long long res;
 			long double check_this = 0;
@@ -410,14 +336,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				{
 					break;
 				}
-				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
-				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
 			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
 			slept=false;
 			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
-			//prev_evaluation=( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
-			//std::cout << "exited busy wait loop\n";
 		}
 		else
 		{
@@ -435,7 +357,6 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		}
 		VBlankTimeInfo_t time_info =
 		{
-//			.target_vblank_time = targetPoint + offset/(2*sleep_cycle),
 			.target_vblank_time = targetPoint + offset,
 			.pipe_write_time    = get_time_in_nanos(),
 		};
@@ -498,16 +419,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				{
 					break;
 				}
-				//std::cout << "std::fpclassify(check_this): " << std::fpclassify(check_this) << "\n";
-				//std::cout << static_cast<uint64_t> (res) << " < " << ((offset*( refresh/g_nOutputRefresh))/(2*sleep_cycle)) << " ?\n";
 			}
 			while ( static_cast<uint64_t> (res) < max_drawtime/4);		
 			skipped_sleep_after_vblank++;
 		}
-		/*else if (slept)
-		{
-			prev_evaluation=INT_MAX;
-		}*/
 		sleep_cycle=0;
 		slept=false;
 		lastDrawTime = drawTime;
