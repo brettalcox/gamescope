@@ -223,13 +223,13 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			int64_t diff_to_half = drawTime - half_nsecInterval;
 			int64_t diff_to_full = nsecInterval - drawTime;
 			
-			if ( diff_to_half > diff_to_full+1)
-			{
-				offset=g_uRollingMaxDrawTime=rollingMaxDrawTime=(centered_mean + std::max(std::abs(static_cast<int64_t>(max_drawtime)+avg_drawtime-static_cast<int64_t>(drawTime)), static_cast<int64_t>(0))*refresh/60)/4;
-				
-			}
-			else
-			{
+			//if ( diff_to_half > diff_to_full+1)
+			//{
+			//	offset=g_uRollingMaxDrawTime=rollingMaxDrawTime=(centered_mean + std::max(std::abs(static_cast<int64_t>(max_drawtime)+avg_drawtime-static_cast<int64_t>(drawTime)), static_cast<int64_t>(0))*refresh/60)/4;
+			//	
+			//}
+			//else
+			//{
 			// This is a rolling average when drawTime < rollingMaxDrawTime,
 			// and a a max when drawTime > rollingMaxDrawTime.
 			// This allows us to deal with spikes in the draw buffer time very easily.
@@ -288,7 +288,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				rollingMaxDrawTime / 1'000'000.0,
 				drawTime / 1'000'000.0,
 				offset / 1'000'000.0 );*/
-			}
+			//}
 			
 			index++;
 			if ( index >= 60 )
