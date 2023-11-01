@@ -97,11 +97,15 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const uint16_t n) /
     int Q1 = a[med(a, 0, mid_index)];
 
     int Q3 = a[mid_index + med(a, mid_index + 1, n)];
+          std::cout << "med(a, 0, mid_index) = " << med(a, 0, mid_index) << "\n"
+    	      << "Q1 = " << Q1 << "\n"
+    	      << "mid_index + med(a, mid_index + 1, n) = " << mid_index + med(a, mid_index + 1, n) << "\n"
+    	      << "Q3 = " << Q3 << "\n";
     
     uint64_t sum=0;
     for (int i = Q1; i < Q3; i++)
     {
-    	sum+= ((static_cast<uint64_t> (a[i])) * 500) << 1;
+    	sum += ((static_cast<uint64_t> (a[i])) * 500) << 1;
     }
     return sum/(Q3 - Q1);
 
@@ -141,7 +145,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblan
 #include <linux/capability.h>
 
 #ifdef __GNUC__
-void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( void )
+void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot, no_reorder )) vblankThreadRun( void )
 #else
 void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( void )
 #endif
