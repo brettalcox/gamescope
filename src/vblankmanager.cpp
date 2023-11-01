@@ -166,18 +166,21 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
 	uint16_t drawtimes[60] = {1};
-
-	std::fill_n(drawtimes, 60, static_cast<uint16_t>(((1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)) >> 1)/500 )  );
-
 	uint16_t drawtimes_pending[60];
-
+	std::fill_n(drawtimes, 60, static_cast<uint16_t>(((1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)) >> 1)/500 )  );
 	int index=0;
+
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
-	const uint32_t sleep_weights[2] = {75, 25};
 	uint64_t max_drawtime=2*centered_mean;
+	
+	
+	const uint32_t sleep_weights[2] = {75, 25};
+	
 	while ( true )
 	{
 		sleep_cycle++;
+		
+		
 		const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
 		const uint64_t nsecInterval = 1'000'000'000ul / refresh;
 		// The redzone is relative to 60Hz, scale it by our
@@ -189,11 +192,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			? g_uVblankDrawBufferRedZoneNS
 			: ( g_uVblankDrawBufferRedZoneNS * 60 * nsecToSec ) / ( refresh * nsecToSec );
 		const double vblank_adj_factor = 60.0 / static_cast<double>((std::max(refresh,g_nOutputRefresh)));
+		
 		uint64_t drawTime;
 		uint64_t offset;
-		bool bVRR = drm_get_vrr_in_use( &g_DRM );
-		uint64_t drawslice=0;
+		
+		
 		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
+		
+		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		if ( !bVRR )
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
@@ -209,33 +215,34 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			
 
 			// If we go over half of our deadzone, be more defensive about things.
-				assert( int64_t(drawTime) >= 0);
-				if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
-					rollingMaxDrawTime = drawTime;
+			assert( int64_t(drawTime) >= 0);
+			if ( int64_t(drawTime) - int64_t(redZone / 2) > int64_t(rollingMaxDrawTime) )
+				rollingMaxDrawTime = drawTime;
 				
-				if (sleep_cycle > 1)
-				{
-					
-					long double roll = std::exp(-(.5*(static_cast<long double>(rollingMaxDrawTime)-static_cast<long double>(redZone)*1.348)/10000000.0));
-					std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
-					roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
-					std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
-					g_uRollingMaxDrawTime = rollingMaxDrawTime = (static_cast<uint64_t>(llroundl(roll)));
-				}
-				else
-				{
-					rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 5*( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (2*range), centered_mean + 2*std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)));
-				}
-				offset = rollingMaxDrawTime + redZone;
+			if (sleep_cycle > 1)
+			{	
+				long double roll = std::exp(-(.5*(static_cast<long double>(rollingMaxDrawTime)-static_cast<long double>(redZone)*1.348)/10000000.0));
+				std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
+				roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
+				std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
+				g_uRollingMaxDrawTime = rollingMaxDrawTime = (static_cast<uint64_t>(llroundl(roll)));
+			}
+			else
+			{
+				rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 5*( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (2*range), centered_mean + 2*std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)));
+			}
+			
+			offset = rollingMaxDrawTime + redZone;
+				
 				
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
-				fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
-				redZone / 1'000'000.0,
-				g_uVBlankRateOfDecayPercentage,
-				rollingMaxDrawTime / 1'000'000.0,
-				drawTime / 1'000'000.0,
-				offset / 1'000'000.0 );
+			fprintf( stdout, "redZone: %.2fms decayRate: %lu%% - rollingMaxDrawTime: %.2fms - drawTime: %.2fms offset: %.2fms\n",
+			  redZone / 1'000'000.0,
+			  g_uVBlankRateOfDecayPercentage,
+			  rollingMaxDrawTime / 1'000'000.0,
+			  drawTime / 1'000'000.0,
+			  offset / 1'000'000.0 );
 
 			
 			index++;
@@ -337,7 +344,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 					break;
 				}
 			}
-			while ( static_cast<uint64_t> (res) <  static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))));
+			while ( static_cast<uint64_t> (res) 
+			       <  static_cast<uint64_t>( llroundl( 
+			      		static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) 
+			      		/ static_cast<long double>(100*g_nOutputRefresh)
+			      					 ))
+			      );
 			slept=false;
 			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
 		}
@@ -355,6 +367,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 		{
 			continue;
 		}
+		
 		VBlankTimeInfo_t time_info =
 		{
 			.target_vblank_time = targetPoint + offset,
