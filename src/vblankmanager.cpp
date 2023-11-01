@@ -202,9 +202,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		{
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
 			
-			drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
-			
-			
+			if (sleep_cycle > 1)
+				drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
+			else
+				drawTime = g_uVblankDrawTimeNS;
 			
 			
 			if ( g_bCurrentlyCompositing )
