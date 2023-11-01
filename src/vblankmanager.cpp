@@ -389,7 +389,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( max_drawtime/4 );
+			sleep_for_nanos( (centered_mean + max_drawtime)/8 );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -434,7 +434,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 					break;
 				}
 			}
-			while ( static_cast<uint64_t> (res) < max_drawtime/4);		
+			while ( static_cast<uint64_t> (res) < (centered_mean + max_drawtime)/8);		
 			skipped_sleep_after_vblank++;
 		}
 		sleep_cycle=0;
