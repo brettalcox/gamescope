@@ -74,11 +74,11 @@ const uint64_t g_uVBlankDrawTimeMinCompositing = 2'400'000;
 
 #define VBLANK_DEBUG
 
-inline uint64_t median(uint64_t* a, const uint64_t l, const uint64_t r) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+inline int median(uint16_t* a, const uint16_t l, const uint16_t r) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
 
 {
 
-    uint64_t n = r - l + 1;
+    int n = static_cast<int>(r) - static_cast<int>(l) + 1;
 
     n = (n + 1) / 2 - 1;
 
@@ -86,7 +86,7 @@ inline uint64_t median(uint64_t* a, const uint64_t l, const uint64_t r) //credit
 
 }
 
-inline uint64_t IQM(uint64_t* a, const uint64_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
+inline uint64_t IQM(uint16_t* a, const uint16_t n) //credit for this function: https://www.geeksforgeeks.org/interquartile-range-iqr/
 
 {
 
@@ -101,7 +101,7 @@ inline uint64_t IQM(uint64_t* a, const uint64_t n) //credit for this function: h
     uint64_t sum=0;
     for (int i = Q1; i < Q3; i++)
     {
-    	sum+=a[i];
+    	sum+= ((static_cast<uint64_t> (a[i])) * 500) << 1;
     }
     return sum/(Q3 - Q1);
 
@@ -176,15 +176,15 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 	const long double g_nsPerTick = getNsPerTick();
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
-	uint64_t drawtimes[60] = {1};
+	uint16_t drawtimes[60] = {1};
 	//uint64_t offsettimes[20] = {1};
-	std::fill_n(drawtimes, 60, 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh));
+	std::fill_n(drawtimes, 60, static_cast<uint16_t>(((1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh)) >> 1)/500 )  );
 	//std::fill_n(offsettimes, 20, 1);
-	uint64_t drawtimes_pending[60];
+	uint16_t drawtimes_pending[60];
 	//uint64_t offsettimes_pending[20];
 	int index=0;
 	uint64_t centered_mean = 1'000'000'000ul / (g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh);
-	int64_t avg_drawtime = static_cast<int64_t>(centered_mean);
+	//int64_t avg_drawtime = static_cast<int64_t>(centered_mean);
 	const uint32_t sleep_weights[2] = {75, 25};
 	uint64_t max_drawtime=2*centered_mean;
 	while ( true )
@@ -213,16 +213,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
 			
 			
-			const int half_refresh = refresh/2;
-			const int64_t half_nsecInterval = 1'000'000'000ul/half_refresh;
-			
 			
 			
 			if ( g_bCurrentlyCompositing )
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
-			drawtimes_pending[index]=drawTime;
-			int64_t diff_to_half = drawTime - half_nsecInterval;
-			int64_t diff_to_full = nsecInterval - drawTime;
+			drawtimes_pending[index] = static_cast<uint16_t>( (drawTime >> 1)/500 );
+			
 			
 			//if ( diff_to_half > diff_to_full+1)
 			//{
@@ -305,11 +301,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 			{
 				memcpy(drawtimes, drawtimes_pending, 60 * sizeof(drawtimes_pending[0]));
 				index=0;
-				const size_t n = 60; 
-				centered_mean = clamp(2*nsecInterval/3, IQM(drawtimes, n), 5*nsecInterval/3);
+				const uint16_t n = 60; 
+				centered_mean = clamp(2*nsecInterval/3, ((static_cast<uint64_t>(IQM(drawtimes, n)))*500) <<1, 5*nsecInterval/3);
 				
-				avg_drawtime = mean(drawtimes, n); 
-				max_drawtime = std::min(std::max(max_drawtime,*std::max_element(std::begin(drawtimes), std::end(drawtimes))), 8*nsecInterval/3) ;
+				//avg_drawtime = mean(drawtimes, n); 
+				max_drawtime = std::min( 
+					      (	
+					  	(static_cast<uint64_t>(std::max(  static_cast<uint16_t>((max_drawtime>>1)/500), *std::max_element(std::begin(drawtimes)), std::end(drawtimes))))
+					      * 500)
+					      <<1
+					, 8*nsecInterval/3);
 				//std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0)/20;
 				
 				/*(auto variance_func = [&mean, &sz](uint64_t  accumulator, const uint64_t val) { //credit for this variance_func: https://stackoverflow.com/a/48578852
