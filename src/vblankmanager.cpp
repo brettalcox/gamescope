@@ -265,7 +265,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 				if (sleep_cycle > 1)
 				{
 					g_uRollingMaxDrawTime = rollingMaxDrawTime;
-					rollingMaxDrawTime =  static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime)))))));
+					rollingMaxDrawTime =  static_cast<uint64_t>(llroundl(static_cast<long double>(centered_mean)/(1.0+std::exp(-std::abs(static_cast<long double>(rollingMaxDrawTime))))));
 				}
 				offset = rollingMaxDrawTime + redZone;
 				
