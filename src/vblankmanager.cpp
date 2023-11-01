@@ -270,7 +270,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
 					std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
 					roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
 					std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
-					g_uRollingMaxDrawTime = rollingMaxDrawTime = (static_cast<uint64_t>(llroundl(roll)))
+					g_uRollingMaxDrawTime = rollingMaxDrawTime = (static_cast<uint64_t>(llroundl(roll)));
 				}
 				else
 				{
