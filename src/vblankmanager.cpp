@@ -96,9 +96,9 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const int n) //cred
 
     int r1 = med(a, 0, mid_index);
 
-    int r3 = std::min(mid_index + med(a, mid_index + 1, n), n);
+    int r3 = std::min(med(a, mid_index + 1, n), n);
           std::cout << "med(a, 0, mid_index) = r1" << med(a, 0, mid_index) << "\n"
-    	      << "std::min(mid_index + med(a, mid_index + 1, n), n) = r3" << std::min(mid_index + med(a, mid_index + 1, n), n) << "\n";
+    	      << "std::min(mid_index + med(a, mid_index + 1, n), n) = r3" << std::min(med(a, mid_index + 1, n), n) << "\n";
     
     uint64_t sum=0;
     for (int i = r1; i < r3; i++)
