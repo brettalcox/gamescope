@@ -307,7 +307,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations") )) vblankThreadRu
     				//variance = std::accumulate(std::begin(drawtimes), std::end(drawtimes), 0.0, variance_func);
 			}
 			
-		//}
+		}
 		else
 		{
 			// VRR:
