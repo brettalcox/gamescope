@@ -157,8 +157,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 
 	uint32_t skipped_sleep_after_vblank=0;
 	
-	if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
-		prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
+	//if ( prctl(PR_CAPBSET_READ, CAP_SYS_NICE, NULL, NULL, NULL) == 1)
+	//	prctl(PR_CAPBSET_DROP, CAP_SYS_NICE, NULL, NULL, NULL);
 
 	const long double g_nsPerTick = getNsPerTick();
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
