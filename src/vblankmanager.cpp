@@ -141,7 +141,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblan
 #include <linux/capability.h>
 
 #ifdef __GNUC__
-void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot, no_reorder )) vblankThreadRun( void )
+void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( void )
 #else
 void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( void )
 #endif
