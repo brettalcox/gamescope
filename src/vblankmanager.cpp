@@ -224,11 +224,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				
 			if (sleep_cycle > 1)
 			{	
-				long double roll = 1.1*std::sqrt(vblank_adj_factor)*std::exp(-((.2*std::pow(static_cast<long double>(rollingMaxDrawTime),.666666666666666666)*std::sqrt(vblank_adj_factor)+5*static_cast<long double>(redZone))/10000000.0));
-				std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
-				roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
-				std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
-				rollingMaxDrawTime = std::min( (static_cast<uint64_t>(llroundl(roll))), nsecInterval);
+				//long double roll = 1.1*std::sqrt(vblank_adj_factor)*std::exp(-((.2*std::pow(static_cast<long double>(rollingMaxDrawTime),.666666666666666666)*std::sqrt(vblank_adj_factor)+5*static_cast<long double>(redZone))/10000000.0));
+				//std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
+				//roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
+				//std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
+				rollingMaxDrawTime = ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range);
 				g_uRollingMaxDrawTime.store(rollingMaxDrawTime, std::memory_order_relaxed);
 			}
 			else
