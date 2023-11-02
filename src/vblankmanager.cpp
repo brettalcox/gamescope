@@ -177,8 +177,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 	while ( true )
 	{
 		sleep_cycle++;
+		long long time_discount = 0;
 		
-		
+		if (sleep_cycle > 1)
+			time_discount=readCycleCount();
+
 		const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
 		const uint64_t nsecInterval = 1'000'000'000ul / refresh;
 		// The redzone is relative to 60Hz, scale it by our
@@ -194,12 +197,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		uint64_t drawTime;
 		uint64_t offset;
 		
-		long long time_discount = 0;
 		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
 		
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		if ( !bVRR )
 		{
+			
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
 			
 			if (sleep_cycle > 1)
@@ -225,7 +228,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
 				roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
 				std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
-				g_uRollingMaxDrawTime = rollingMaxDrawTime = std::min( (static_cast<uint64_t>(llroundl(roll))), nsecInterval);
+				rollingMaxDrawTime = std::min( (static_cast<uint64_t>(llroundl(roll))), nsecInterval);
+				g_uRollingMaxDrawTime.load(rollingMaxDrawTime, std::memory_order_relaxed);
 			}
 			else
 			{
@@ -249,7 +253,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			
 			if ( sleep_cycle < 2 && index >= 64 )
 			{
-				time_discount=readCycleCount();
+				
 				memcpy(drawtimes, drawtimes_pending, 64 * sizeof(drawtimes_pending[0]));
 				index=0;
 				const uint16_t n = 64; 
@@ -261,7 +265,6 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 					      * 500)
 					      <<1
 					, 8*nsecInterval/3);
-				time_discount=readCycleCount() - time_discount;
 			}
 			
 		}
@@ -306,10 +309,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		
 		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l)
 		{
+			
 			int64_t diff;
 			long long res;
 			long double check_this = 0;
 			uint64_t prev = readCycleCount();
+			time_discount = static_cast<int64_t>(prev)-time_discount;
 			do
 			{
 				res = INT_MAX;
@@ -353,6 +358,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			      		/ static_cast<long double>(100*g_nOutputRefresh)
 			      					 ))
 			      );
+			time_discount=0;
 			slept=false;
 			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
 		}
@@ -360,8 +366,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>((offset*refresh * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100*g_nOutputRefresh)) - static_cast<long double>(time_discount)*g_nsPerTick )));
-
+			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>((offset*refresh * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100*g_nOutputRefresh)) )));
+			
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
 		}
