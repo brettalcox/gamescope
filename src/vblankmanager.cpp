@@ -229,7 +229,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			}
 			else
 			{
-				rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range), llroundl( static_cast<double>((centered_mean/2)) * std::pow(static_cast<double>(drawTime)/(std::max(static_cast<double>( std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime))), 1 )), 2));
+				rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range), llroundl( static_cast<double>((centered_mean/2)) * std::pow(static_cast<double>(drawTime)/(std::max(static_cast<double>( std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime))), 1.0 )), 2));
 			}
 			
 			offset = rollingMaxDrawTime + redZone;
