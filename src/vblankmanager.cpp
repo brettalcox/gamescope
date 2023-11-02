@@ -210,13 +210,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			
 			const uint64_t alpha = g_uVBlankRateOfDecayPercentage;
 			
-			if (sleep_cycle > 1)
-				drawTime = g_uVblankDrawTimeNS.load(std::memory_order_acquire);
-			else
+			if (sleep_cycle < 2)
 				drawTime = g_uVblankDrawTimeNS;
 			
 			
-			if ( g_bCurrentlyCompositing )
+			if ( sleep_cycle < 2 && g_bCurrentlyCompositing )
 				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
 			if (sleep_cycle < 2)
 				drawtimes_pending[index] = static_cast<uint16_t>( (drawTime >> 1)/500 );
@@ -381,7 +379,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>((offset*refresh * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100*g_nOutputRefresh)) )));
+			targetPoint = vblank_next_target(  static_cast<uint64_t>( llroundl( static_cast<long double>((offset * sleep_weights[sleep_cycle-1] ) / static_cast<long double>(100)) )));
 			
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
@@ -422,7 +420,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		if (!slept || skipped_sleep_after_vblank >= 3 )
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos(  2'000'000ul );
+			sleep_for_nanos( offset + 1'000'000ul );
 		}
 		else
 		{
@@ -471,7 +469,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 					break;
 				}
 			}
-			while ( static_cast<uint64_t> (res) <  2'000'000ul);		
+			while ( static_cast<uint64_t> (res) <  offset + 1'000'000ul);		
 			skipped_sleep_after_vblank++;
 		}
 		sleep_cycle=0;
