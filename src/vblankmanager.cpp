@@ -420,7 +420,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		if (!slept || skipped_sleep_after_vblank >= 3 )
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( offset + 1'000'000ul );
+			sleep_for_nanos( offset + static_cast<uint64_t> (1'000'000*std::sqrt(vblank_adj_factor) );
 		}
 		else
 		{
@@ -469,7 +469,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 					break;
 				}
 			}
-			while ( static_cast<uint64_t> (res) <  offset + 1'000'000ul);		
+			while ( static_cast<uint64_t> (res) <  offset + static_cast<uint64_t> (1'000'000*std::sqrt(vblank_adj_factor)));		
 			skipped_sleep_after_vblank++;
 		}
 		sleep_cycle=0;
