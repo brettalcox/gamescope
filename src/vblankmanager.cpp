@@ -321,6 +321,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			uint64_t prev = readCycleCount();
 			uint64_t before = get_time_in_nanos();
 			//time_discount = static_cast<int64_t>(prev)-time_discount;
+#ifdef __GNUC__
+#pragma GCC novector     
+#pragma GCC unroll 0
+#endif
 			do
 			{
 				res = INT_MAX;
@@ -426,6 +430,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			long long res;
 			long double check_this = 0;
 			uint64_t prev = readCycleCount();
+#ifdef __GNUC__
+#pragma GCC novector     
+#pragma GCC unroll 0
+#endif
 			do
 			{
 				res = INT_MAX;
