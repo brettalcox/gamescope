@@ -225,11 +225,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				std::cout << "std::exp(-(static_cast<long double>(rollingMaxDrawTime)/10000000.0)) = " << roll << "\n";
 				roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
 				std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
-				g_uRollingMaxDrawTime = rollingMaxDrawTime = std::min( (static_cast<uint64_t>(llroundl(roll))), nsecInterval+redZone);
+				g_uRollingMaxDrawTime = rollingMaxDrawTime = std::min( (static_cast<uint64_t>(llroundl(roll))), nsecInterval);
 			}
 			else
 			{
-				rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 3*( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (2*range), static_cast<uint64_t>(llroundl( std::sqrt(std::pow((centered_mean/2),2) + std::pow(std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 2)))));
+				rollingMaxDrawTime = std::clamp(centered_mean*2 - std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range), static_cast<uint64_t>(llroundl( std::sqrt(std::pow((centered_mean/2),2) + std::pow(1/( std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime)), 2))))));
 			}
 			
 			offset = rollingMaxDrawTime + redZone;
