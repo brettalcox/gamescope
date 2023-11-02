@@ -229,7 +229,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				roll =  static_cast<long double>(centered_mean ? (centered_mean) : 3*nsecInterval/2)/(1.0+roll);
 				std::cout << "static_cast<long double>(centered_mean)/(1.0+roll) = " << roll << "\n";
 				rollingMaxDrawTime = std::min( (static_cast<uint64_t>(llroundl(roll))), nsecInterval);
-				g_uRollingMaxDrawTime.load(rollingMaxDrawTime, std::memory_order_relaxed);
+				g_uRollingMaxDrawTime.store(rollingMaxDrawTime, std::memory_order_relaxed);
 			}
 			else
 			{
