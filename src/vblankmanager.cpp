@@ -182,10 +182,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		if (sleep_cycle < 2)
 			vblank_begin=get_time_in_nanos();
 		
-		long long time_discount = 0;
+		//long long time_discount = 0;
 		
-		if (sleep_cycle > 1)
-			time_discount=readCycleCount();
+		//if (sleep_cycle > 1)
+		//	time_discount=readCycleCount();
 
 		const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
 		const uint64_t nsecInterval = 1'000'000'000ul / refresh;
@@ -312,14 +312,15 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 #endif
 		uint64_t targetPoint;
 		
-		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l)
+		if ( static_cast<uint64_t>( llroundl( static_cast<long double>(offset*sleep_weights[sleep_cycle-1]) / static_cast<long double>(100*g_nOutputRefresh))) < 1'000'000l)
 		{
 			
 			int64_t diff;
 			long long res;
 			long double check_this = 0;
 			uint64_t prev = readCycleCount();
-			time_discount = static_cast<int64_t>(prev)-time_discount;
+			uint64_t before = get_time_in_nanos();
+			//time_discount = static_cast<int64_t>(prev)-time_discount;
 			do
 			{
 				res = INT_MAX;
@@ -342,7 +343,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				_mm_pause();
 # endif	
 #endif
-				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev)-time_discount;
+				diff = static_cast<int64_t>(readCycleCount()) - static_cast<int64_t>(prev); //-time_discount;
 				if ( diff < 0)
 				{
 					std::cout << "oh noes\n";
@@ -359,11 +360,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			}
 			while ( static_cast<uint64_t> (res) 
 			       <  static_cast<uint64_t>( llroundl( 
-			      		static_cast<long double>(offset*refresh*sleep_weights[sleep_cycle-1]) 
-			      		/ static_cast<long double>(100*g_nOutputRefresh)
+			      		static_cast<long double>(offset*sleep_weights[sleep_cycle-1]) 
+			      		/ static_cast<long double>(100)
 			      					 ))
 			      );
-			time_discount=0;
+			std::cout << "busy wait loop target wait time: " <<
+			      		static_cast<long double>(offset*sleep_weights[sleep_cycle-1]) 
+			      		/ static_cast<long double>(100)
+			      					 /1'000'000.0 << "ms\n"
+			      	  << "actual wait time: " << static_cast<long double> (get_time_in_nanos() - before)/1'000'000.0 << "ms\n";
+			//time_discount=0;
 			slept=false;
 			targetPoint = vblank_next_target( static_cast<uint64_t>(llroundl(offset)) );
 		}
@@ -412,7 +418,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		if (!slept)
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( (centered_mean + offset)/2 + 1'000'000ul );
+			sleep_for_nanos( (nsecInterval)/2 + 1'000'000ul );
 		}
 		else if (skipped_sleep_after_vblank < 3)
 		{
@@ -457,7 +463,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 					break;
 				}
 			}
-			while ( static_cast<uint64_t> (res) < (centered_mean + offset)/2 + 1'000'000ul);		
+			while ( static_cast<uint64_t> (res) < (nsecInterval)/2 + 1'000'000ul);		
 			skipped_sleep_after_vblank++;
 		}
 		sleep_cycle=0;
