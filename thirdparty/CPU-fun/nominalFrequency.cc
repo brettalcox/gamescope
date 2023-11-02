@@ -409,8 +409,9 @@ long double __attribute__((optimize("-fno-unsafe-math-optimizations", "-froundin
   printf ("   Sanity check against std::chrono::steady_clock gives frequency %sz => %s\n",
           formatSI(1./measured,9,'H').c_str(), formatSI(measured,9,'s').c_str());
   uint64_t minTicks = measureClockGranularity();
+  double ret = res;
   res = res*minTicks;
   printf ("Measured granularity = %llu tick%s => %sz, %s\n",
           (unsigned long long)minTicks, minTicks != 1 ? "s": "", formatSI(1./res,9,'H').c_str(), formatSI(res,9,'s').c_str());
-  return static_cast<long double>(res)*1'000'000'000;
+  return static_cast<long double>(ret)*1'000'000;
 }
