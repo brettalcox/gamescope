@@ -173,10 +173,15 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 	
 	
 	const uint32_t sleep_weights[2] = {75, 25};
-	
+	int64_t vblank_begin=0;
+	uint64_t time_start = get_time_in_nanos();
+	uint64_t counter = 0;
 	while ( true )
 	{
 		sleep_cycle++;
+		if (sleep_cycle < 2)
+			vblank_begin=get_time_in_nanos();
+		
 		long long time_discount = 0;
 		
 		if (sleep_cycle > 1)
@@ -391,6 +396,16 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		else
 		{
 			gpuvis_trace_printf( "sent vblank" );
+			std::cout << "vblank cycle time: " << static_cast<long double>(get_time_in_nanos()-vblank_begin)/1'000'000.0 << "ms\n";
+			counter++;
+		}
+		vblank_begin=0;
+		
+		uint64_t this_time=(get_time_in_nanos() - time_start)/1'000'000'000ul;
+		if ( this_time > 5)
+		{
+			std::cout << counter++ " vblanks sent in " << this_time << " seconds\n";
+			time_start=get_time_in_nanos();
 		}
 		
 		// Get on the other side of it now
@@ -449,6 +464,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		slept=false;
 		lastDrawTime = drawTime;
 		lastOffset = offset;
+		
 	}
 }
 
