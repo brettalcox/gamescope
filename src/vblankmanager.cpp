@@ -404,7 +404,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		uint64_t this_time=(get_time_in_nanos() - time_start)/1'000'000'000ul;
 		if ( this_time > 5)
 		{
-			std::cout << counter++ " vblanks sent in " << this_time << " seconds\n";
+			std::cout << counter << " vblanks sent in " << this_time << " seconds\n";
 			time_start=get_time_in_nanos();
 		}
 		
