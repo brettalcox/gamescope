@@ -239,8 +239,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				rollingMaxDrawTime = std::min(( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range), static_cast<uint64_t>(llroundl( static_cast<double>((centered_mean/2)) * std::pow(static_cast<double>(drawTime)/(std::max(static_cast<double>( std::abs(static_cast<int64_t>(lastDrawTime) - static_cast<int64_t>(drawTime))), 1.0 )), 2))));
 			}
 			
-			offset = rollingMaxDrawTime + redZone;
-				
+			//offset = rollingMaxDrawTime + redZone;
+			offset = 8'200'000; 	
 				
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
