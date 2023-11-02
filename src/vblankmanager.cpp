@@ -419,12 +419,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		}
 		
 		// Get on the other side of it now
-		if (!slept)
+		if (!slept || skipped_sleep_after_vblank >= 3 )
 		{
 			skipped_sleep_after_vblank=0;
 			sleep_for_nanos(  2'000'000ul );
 		}
-		else if (skipped_sleep_after_vblank < 3)
+		else
 		{
 			int64_t diff;
 			long long res;
