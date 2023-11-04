@@ -13,7 +13,6 @@
 #include <errno.h>
 #include <stdlib.h>
 #include <poll.h>
-#include <assert.h>
 
 extern "C" {
 #include <wlr/types/wlr_buffer.h>
@@ -1624,10 +1623,8 @@ int drm_commit(struct drm_t *drm, const struct FrameInfo_t *frameInfo )
 // 					  (uint64_t)(unsigned long)&drm->kms_out_fence_fd);
 
 
-	assert( drm->fbids_queued.size() == 0 );
-	uint64_t time_now;
-	uint64_t copied_g_uVblankDrawTimeNS;
-	uint64_t g_SteamCompMgrVBlankTime_pipe_write_time_copied;
+
+
 	bool isPageFlip = drm->flags & DRM_MODE_PAGE_FLIP_EVENT;
 
 	if ( isPageFlip ) {
@@ -1719,13 +1716,8 @@ int drm_commit(struct drm_t *drm, const struct FrameInfo_t *frameInfo )
 	// is queued and would end up being the new page flip, rather than here.
 	// However, the page flip handler is called when the page flip occurs,
 	// not when it is successfully queued.
-	time_now = get_time_in_nanos();
-	copied_g_uVblankDrawTimeNS = g_uVblankDrawTimeNS;
-	g_SteamCompMgrVBlankTime_pipe_write_time_copied = g_SteamCompMgrVBlankTime.pipe_write_time;
-	
-	copied_g_uVblankDrawTimeNS = time_now - g_SteamCompMgrVBlankTime_pipe_write_time_copied;
-	assert(copied_g_uVblankDrawTimeNS <= std::max(time_now,g_SteamCompMgrVBlankTime_pipe_write_time_copied));
-	g_uVblankDrawTimeNS = copied_g_uVblankDrawTimeNS;
+	g_uVblankDrawTimeNS = get_time_in_nanos() - g_SteamCompMgrVBlankTime.pipe_write_time;
+
 	if ( isPageFlip ) {
 		// Wait for flip handler to unlock
 		drm->flip_lock.lock();

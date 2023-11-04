@@ -140,8 +140,6 @@ uint32_t g_reshade_technique_idx = 0;
 
 uint64_t timespec_to_nanos(struct timespec& spec)
 {
-	assert(spec.tv_sec * 1'000'000'000ul == static_cast<uint64_t>(spec.tv_sec)*1'000'000'000ul);
-	assert( static_cast<long unsigned int> (spec.tv_nsec) <= spec.tv_sec * 1'000'000'000ul + spec.tv_nsec);
 	return spec.tv_sec * 1'000'000'000ul + spec.tv_nsec;
 }
 
@@ -1111,10 +1109,7 @@ void sleep_for_nanos(uint64_t nanos)
 {
 	timespec ts;
 	ts.tv_sec = time_t(nanos / 1'000'000'000ul);
-	assert( time_t(nanos / 1'000'000'000ul) >= 0 );
-	
 	ts.tv_nsec = long(nanos % 1'000'000'000ul);
-	assert( long(nanos % 1'000'000'000ul) >= 0);
 	nanosleep(&ts, nullptr);
 }
 
@@ -1123,8 +1118,6 @@ void sleep_until_nanos(uint64_t nanos)
 	uint64_t now = get_time_in_nanos();
 	if (now >= nanos)
 		return;
-	assert(nanos - now <= std::max(nanos,now));
-	
 	sleep_for_nanos(nanos - now);
 }
 
@@ -2668,13 +2661,7 @@ paint_all(bool async)
 			}
 
 			// Update the time it took us to commit
-			uint64_t time_now = get_time_in_nanos();
-			uint64_t copied_g_uVblankDrawTimeNS = g_uVblankDrawTimeNS;
-			uint64_t g_SteamCompMgrVBlankTime_pipe_write_time_copied = g_SteamCompMgrVBlankTime.pipe_write_time;
-	
-			copied_g_uVblankDrawTimeNS = time_now - g_SteamCompMgrVBlankTime_pipe_write_time_copied;
-			assert(copied_g_uVblankDrawTimeNS <= std::max(time_now,g_SteamCompMgrVBlankTime_pipe_write_time_copied));
-			g_uVblankDrawTimeNS = copied_g_uVblankDrawTimeNS;
+			g_uVblankDrawTimeNS = get_time_in_nanos() - g_SteamCompMgrVBlankTime.pipe_write_time;
 		}
 		else
 		{
