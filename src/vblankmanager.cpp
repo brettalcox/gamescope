@@ -358,10 +358,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				res = check_this_first;
 			}
 			while ( res < compared_to );
-			std::cout << "busy wait loop target wait time: " <<
-			      		offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh)/1'000'000ll << "ms\n"
-			      	  << "actual wait time: " << offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh)/1'000'000ll << "ms\n";
-			//time_discount=0;
+
 			slept=false;
 			targetPoint = vblank_next_target( offset );
 		}
