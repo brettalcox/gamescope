@@ -134,6 +134,7 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const int n) //cred
     }
     return sum/(r3 - r1);
 }
+#undef med
 
 #ifdef __clang__
 uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblank_next_target( const uint64_t offset)
