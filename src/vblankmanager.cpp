@@ -66,6 +66,36 @@ static std::atomic<uint64_t> g_uRollingMaxDrawTime = { g_uStartingDrawTime };
 
 std::atomic<bool> g_bCurrentlyCompositing = { false };
 
+
+inline void pause(void)
+{
+#ifndef __clang__			
+# if defined(__x86_64__) || defined(__i386__)
+	__builtin_ia32_pause();
+# else
+#  if defined(__aarch64__) || defined(__arm__) //GCC doesn't have an intrinsic for aarch64 yield instruction
+	asm volatile("yield"); //https://stackoverflow.com/a/70076751
+#  elif __has_builtin(__sync_synchronize)
+	__sync_synchronize(); //close enough to a pause intrinsic
+	__sync_synchronize();
+	__sync_synchronize();
+# endif
+#else
+# if defined(__x86_64__) || defined(__i386__)
+	_mm_pause();
+# else
+#  if defined(__aarch64__) || defined(__arm__)
+	asm volatile("yield"); //https://stackoverflow.com/a/70076751
+#  elif __has_builtin(__sync_synchronize)
+	__sync_synchronize(); //close enough to a pause intrinsic
+	__sync_synchronize();
+	__sync_synchronize();
+#  endif
+# endif	
+#endif
+
+}
+
 // The minimum drawtime to use when we are compositing.
 // Getting closer and closer to vblank when compositing means that we can get into
 // a feedback loop with our clocks. Pick a sane minimum draw time.
@@ -311,26 +341,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 			do
 			{
 				res = INT_MAX;
-#ifndef __clang__			
-# if defined(__x86_64__) || defined(__i386__)
-				__builtin_ia32_pause();
-# else
-#  if __has_builtin(__sync_synchronize)
-				__sync_synchronize(); //close enough to a pause intrinsic
-				__sync_synchronize();
-				__sync_synchronize();
-# endif
-#else
-# if defined(__x86_64__) || defined(__i386__)
-				mm_pause();
-# else
-#  if __has_builtin(__sync_synchronize)
-				__sync_synchronize(); //close enough to a pause intrinsic
-				__sync_synchronize();
-				__sync_synchronize();
-#  endif
-# endif	
-#endif
+				
+				pause();
+				
 				diff = (int64_t)readCycleCount() - (int64_t)prev;
 				if ( diff < 0)
 				{
@@ -418,26 +431,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 			do
 			{
 				res = INT_MAX;
-#ifndef __clang__			
-# if defined(__x86_64__) || defined(__i386__)
-				__builtin_ia32_pause();
-# else
-#  if __has_builtin(__sync_synchronize)
-				__sync_synchronize(); //close enough to a pause intrinsic
-				__sync_synchronize();
-				__sync_synchronize();
-# endif
-#else
-# if defined(__x86_64__) || defined(__i386__)
-				mm_pause();
-# else
-#  if __has_builtin(__sync_synchronize)
-				__sync_synchronize(); //close enough to a pause intrinsic
-				__sync_synchronize();
-				__sync_synchronize();
-#  endif
-# endif	
-#endif
+				
+				pause();
+				
 				diff = (int64_t)readCycleCount() - (int64_t)prev;
 				if (diff < 0)
 				{
