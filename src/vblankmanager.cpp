@@ -105,11 +105,10 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const int n) //cred
     return sum/(r3 - r1);
 }
 
-
-#ifdef __GNUC__
-uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblank_next_target( const uint64_t offset )
-#else
+#ifdef __clang__
 uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblank_next_target( const uint64_t offset)
+#else
+uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblank_next_target( const uint64_t offset )
 #endif
 {
 	const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
@@ -134,12 +133,10 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblan
         assert(targetPoint <= targetPoint+( ( (long)(targetPoint-copy_targetPoint)*div.rem) / nsecInterval));
 	return targetPoint+(uint64_t)(((long)(targetPoint-copy_targetPoint)*div.rem)/nsecInterval);
 }
-
-
-#ifdef __GNUC__
-void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( void )
-#else
+#ifdef __clang__
 void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( void )
+#else
+void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( void )
 #endif
 {
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
@@ -311,30 +308,27 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			uint64_t prev = readCycleCount();
 			
 			double compared_to = (double) ( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
-#ifdef __GNUC__
-#pragma GCC novector     
-#pragma GCC unroll 0
-#endif
 			do
 			{
 				res = INT_MAX;
-#ifdef __GNUC__			
-# if !(LOMP_TARGET_ARCH_X86_64)
+#ifndef __clang__			
+# if defined(__x86_64__) || defined(__i386__)
+				__builtin_ia32_pause();
+# else
+#  if __has_builtin(__sync_synchronize)
 				__sync_synchronize(); //close enough to a pause intrinsic
 				__sync_synchronize();
 				__sync_synchronize();
-# else	
-				__builtin_ia32_pause();
 # endif
 #else
-# if !(LOMP_TARGET_ARCH_X86_64)
+# if defined(__x86_64__) || defined(__i386__)
+				mm_pause();
+# else
 #  if __has_builtin(__sync_synchronize)
 				__sync_synchronize(); //close enough to a pause intrinsic
 				__sync_synchronize();
 				__sync_synchronize();
 #  endif
-# else
-				_mm_pause();
 # endif	
 #endif
 				diff = (int64_t)readCycleCount() - (int64_t)prev;
@@ -421,30 +415,27 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			uint64_t prev = readCycleCount();
 			
 			double compared_to = (double) (offset + adjusted_extra_sleep);
-#ifdef __GNUC__
-#pragma GCC novector     
-#pragma GCC unroll 0
-#endif
 			do
 			{
 				res = INT_MAX;
-#ifdef __GNUC__			
-# if !(LOMP_TARGET_ARCH_X86_64)
+#ifndef __clang__			
+# if defined(__x86_64__) || defined(__i386__)
+				__builtin_ia32_pause();
+# else
+#  if __has_builtin(__sync_synchronize)
 				__sync_synchronize(); //close enough to a pause intrinsic
 				__sync_synchronize();
 				__sync_synchronize();
-# else	
-				__builtin_ia32_pause();
 # endif
 #else
-# if !(LOMP_TARGET_ARCH_X86_64)
+# if defined(__x86_64__) || defined(__i386__)
+				mm_pause();
+# else
 #  if __has_builtin(__sync_synchronize)
 				__sync_synchronize(); //close enough to a pause intrinsic
 				__sync_synchronize();
 				__sync_synchronize();
 #  endif
-# else
-				_mm_pause();
 # endif	
 #endif
 				diff = (int64_t)readCycleCount() - (int64_t)prev;
