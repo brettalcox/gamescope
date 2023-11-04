@@ -309,7 +309,6 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 			long double check_this = 0.0L;
 			
 			uint64_t prev = readCycleCount();
-			uint64_t before = get_time_in_nanos();
 			
 			double compared_to = (double) ( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
 #ifdef __GNUC__
