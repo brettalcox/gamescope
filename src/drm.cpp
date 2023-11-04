@@ -1623,7 +1623,7 @@ int drm_commit(struct drm_t *drm, const struct FrameInfo_t *frameInfo )
 // 					  (uint64_t)(unsigned long)&drm->kms_out_fence_fd);
 
 
-
+	assert( drm->fbids_queued.size() == 0 );
 
 	bool isPageFlip = drm->flags & DRM_MODE_PAGE_FLIP_EVENT;
 
