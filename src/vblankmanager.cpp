@@ -154,7 +154,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 	uint32_t skipped_sleep_after_vblank=0;
 	
 
-	long double g_nsPerTick = getNsPerTick();
+	static long double g_nsPerTick_long = getNsPerTick();
+	static double g_nsPerTick = (double) g_nsPerTick_long;
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
 	uint16_t drawtimes[64] = {1};
@@ -303,10 +304,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		{
 			
 			int64_t diff;
-			long long res;
-			long double check_this = 0;
+			double res;
+			double check_this_first = 0.0;
+			long double check_this = 0.0L;
+			
 			uint64_t prev = readCycleCount();
 			uint64_t before = get_time_in_nanos();
+			
+			double compared_to = (double) ( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
 #ifdef __GNUC__
 #pragma GCC novector     
 #pragma GCC unroll 0
@@ -333,22 +338,26 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				_mm_pause();
 # endif	
 #endif
-				diff = (int64_t)readCycleCount() - (int64_t)prev; //-time_discount;
+				diff = (int64_t)readCycleCount() - (int64_t)prev;
 				if ( diff < 0)
 				{
 					std::cout << "oh noes\n";
 					continue; // in case tsc counter resets or something
 				}
 				
-				check_this = (long double)diff * g_nsPerTick;
-				
-				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
-				if (std::fpclassify(check_this) == FP_INFINITE)
+				check_this_first = (double)diff * g_nsPerTick;
+				if (std::fpclassify(check_this_first) == FP_INFINITE)
 				{
-					break;
+					check_this = (long double)diff * g_nsPerTick_long;
+					if (std::fpclassify(check_this) == FP_INFINITE)
+					{
+						break;
+					}
+					res = ( ( std::fpclassify(check_this) == FP_NORMAL && check_this <= DBL_MAX) ? check_this :  DBL_MAX);
 				}
+				res = check_this_first;
 			}
-			while ( (uint64_t) res <  offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
+			while ( res < compared_to );
 			std::cout << "busy wait loop target wait time: " <<
 			      		offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh)/1'000'000ll << "ms\n"
 			      	  << "actual wait time: " << offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh)/1'000'000ll << "ms\n";
@@ -409,9 +418,13 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 		{
 			
 			int64_t diff;
-			long long res;
-			long double check_this = 0;
+			double res;
+			double check_this_first = 0.0;
+			long double check_this = 0.0L;
+			
 			uint64_t prev = readCycleCount();
+			
+			double compared_to = (double) (offset + adjusted_extra_sleep);
 #ifdef __GNUC__
 #pragma GCC novector     
 #pragma GCC unroll 0
@@ -438,22 +451,27 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThr
 				_mm_pause();
 # endif	
 #endif
-				diff = (int64_t)readCycleCount()- (int64_t)prev;
-				if ( diff < 0)
+				diff = (int64_t)readCycleCount() - (int64_t)prev;
+				if (diff < 0)
 				{
 					std::cout << "oh noes\n";
 					continue; // in case tsc counter resets or something
 				}
 				
-				check_this = (long double)diff * g_nsPerTick;
-				
-				res = (std::fpclassify(check_this) == FP_NORMAL) ? llroundl(check_this) : INT_MAX;
-				if (std::fpclassify(check_this) == FP_INFINITE)
+				check_this_first = (double)diff * g_nsPerTick;
+				if (std::fpclassify(check_this_first) == FP_INFINITE)
 				{
-					break;
+					check_this = (long double)diff * g_nsPerTick_long;
+					if (std::fpclassify(check_this) == FP_INFINITE)
+					{
+						break;
+					}
+					res = ( ( std::fpclassify(check_this) == FP_NORMAL && check_this <= DBL_MAX) ? check_this :  DBL_MAX);
 				}
+				res = check_this_first;
+				
 			}
-			while ( (uint64_t)res <  offset + adjusted_extra_sleep);		
+			while (res <  compared_to);		
 			skipped_sleep_after_vblank++;
 		}
 		sleep_cycle=0;
