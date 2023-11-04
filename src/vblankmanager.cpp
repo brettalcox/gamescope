@@ -341,7 +341,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 			double compared_to = (double) ( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
 			do
 			{
-				res = INT_MAX;
+				res = DBL_MAX;
 				
 				pause();
 				
@@ -431,7 +431,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 			double compared_to = (double) (offset + adjusted_extra_sleep);
 			do
 			{
-				res = INT_MAX;
+				res = DBL_MAX;
 				
 				pause();
 				
