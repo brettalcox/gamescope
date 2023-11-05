@@ -501,7 +501,7 @@ void vblankThreadVR()
 }
 #endif
 
-int vblank_init( void )
+int vblank_init( const bool never_busy_wait, const always_busy_wait )
 {
 	if ( pipe2( g_vblankPipe, O_CLOEXEC | O_NONBLOCK ) != 0 )
 	{
@@ -525,8 +525,10 @@ int vblank_init( void )
 	#define BALANCED_BUSY_WAIT false,false
 	#define ALWAYS_BUSY_WAIT false,true
 	
-	if ( g_nsPerTick_long == CANT_USE_CPU_TIMER)
+	if ( never_busy_wait || g_nsPerTick_long == CANT_USE_CPU_TIMER)
 		std::thread vblankThread( vblankThreadRun, NEVER_BUSY_WAIT );
+	else if (always_busy_wait)
+		std::thread vblankThread( vblankThreadRun, ALWAYS_BUSY_WAIT, g_nsPerTick_long );
 	else
 		std::thread vblankThread( vblankThreadRun, BALANCED_BUSY_WAIT, g_nsPerTick_long );
 	

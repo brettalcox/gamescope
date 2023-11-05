@@ -7293,6 +7293,8 @@ steamcompmgr_main(int argc, char **argv)
 	int o;
 	int opt_index = -1;
 	bool bForceWindowsFullscreen = false;
+	bool never_busy_wait = false;
+	bool always_busy_wait = false;
 	while ((o = getopt_long(argc, argv, gamescope_optstring, gamescope_options, &opt_index)) != -1)
 	{
 		const char *opt_name;
@@ -7359,6 +7361,10 @@ steamcompmgr_main(int argc, char **argv)
 					g_flHDRItmTargetNits = atof(optarg);
 				} else if (strcmp(opt_name, "framerate-limit") == 0) {
 					g_nSteamCompMgrTargetFPS = atoi(optarg);
+				} else if (strcmp(opt_name, "vblank-never-spin") == 0) {
+					never_busy_wait = true;
+				} else if (strcmp(opt_name, "vblank-always-spin") == 0) {
+					always_busy_wait = true;
 				} else if (strcmp(opt_name, "reshade-effect") == 0) {
 					g_reshade_effect = optarg;
 				} else if (strcmp(opt_name, "reshade-technique-idx") == 0) {
@@ -7400,7 +7406,7 @@ steamcompmgr_main(int argc, char **argv)
 		vrsession_steam_mode( steamMode );
 #endif
 
-	int vblankFD = vblank_init();
+	int vblankFD = vblank_init(never_busy_wait, always_busy_wait);
 	assert( vblankFD >= 0 );
 
 	std::unique_lock<std::mutex> xwayland_server_guard(g_SteamCompMgrXWaylandServerMutex);
