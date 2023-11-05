@@ -58,7 +58,7 @@ const struct option *gamescope_options = (struct option[]){
 	{ "sharpness", required_argument, nullptr, 0 },
 	{ "fsr-sharpness", required_argument, nullptr, 0 },
 	{ "vblank-never-spin", no_argument, nullptr, 0},
-	{ "vblank-balanced-spinning", no_argument, nullptr, 0},
+	{ "vblank-sometimes-spin", no_argument, nullptr, 0},
 	{ "vblank-always-spin", no_argument, nullptr, 0},
 	{ "rt", no_argument, nullptr, 0 },
 	{ "prefer-vk-device", required_argument, 0 },
