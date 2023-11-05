@@ -66,6 +66,14 @@ static std::atomic<uint64_t> g_uRollingMaxDrawTime = { g_uStartingDrawTime };
 
 std::atomic<bool> g_bCurrentlyCompositing = { false };
 
+inline bool __attribute__((always_inline)) _isinf(double val)
+{
+#ifndef __clang__
+	return __builtin_isinf(val);
+#else
+	return __builtin_isfpclass(val, __FPCLASS_POSINF+_FPCLASS_NEGINF);
+#endif
+}
 
 inline void cpu_pause(void)
 {
@@ -95,9 +103,12 @@ inline void cpu_pause(void)
 #  endif
 # endif	
 #endif
-
-
 }
+
+
+
+
+
 
 // The minimum drawtime to use when we are compositing.
 // Getting closer and closer to vblank when compositing means that we can get into
@@ -142,7 +153,7 @@ inline uint64_t __attribute__((nonnull(1))) IQM(uint16_t* a, const int n) //cred
 #ifdef __clang__
 uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblank_next_target( const uint64_t offset)
 #else
-uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblank_next_target( const uint64_t offset )
+uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-math", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblank_next_target( const uint64_t offset )
 #endif
 {
 	const int refresh = g_nNestedRefresh ? g_nNestedRefresh : g_nOutputRefresh;
@@ -172,7 +183,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-path
 #ifdef __clang__
 void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( const bool neverBusyWait, const bool alwaysBusyWait, const long double g_nsPerTick_long  )
 #else
-void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( const bool neverBusyWait, const bool alwaysBusyWait, const long double g_nsPerTick_long  )
+void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-math", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( const bool neverBusyWait, const bool alwaysBusyWait, const long double g_nsPerTick_long  )
 #endif
 {
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
@@ -331,7 +342,9 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 
 #endif
 		uint64_t targetPoint;
-		
+
+#define HMMM(expr) __builtin_expect_with_probability(expr, 1, .15) //hmmm has slightly higher probability than meh
+#define MEH(expr) __builtin_expect_with_probability(expr, 1, .02)
 		if ( !neverBusyWait && ( alwaysBusyWait || sleep_cycle > 1 ) 
 		&& offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) < 1'000'000ll)
 		{
@@ -358,11 +371,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 				}
 				
 				check_this_first = (double)diff * g_nsPerTick;
-				if (std::fpclassify(check_this_first) == FP_INFINITE)
+				if ( HMMM(_isinf(check_this_first)) )
 				{
 					check_this = (long double)diff * g_nsPerTick_long;
-					if (std::fpclassify(check_this) == FP_INFINITE)
-					{
+					if ( MEH(std::fpclassify(check_this) == FP_INFINITE) ) //meh and hmmm: compiler hints that this branch is unlikely to occur
+					{						       //     hopefully might reduce fruitless speculative execution
 						break;
 					}
 					res = ( ( std::fpclassify(check_this) == FP_NORMAL && check_this <= DBL_MAX) ? check_this :  DBL_MAX);
@@ -448,11 +461,11 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 				}
 				
 				check_this_first = (double)diff * g_nsPerTick;
-				if (std::fpclassify(check_this_first) == FP_INFINITE)
+				if ( HMMM(_isinf(check_this_first)) )
 				{
 					check_this = (long double)diff * g_nsPerTick_long;
-					if (std::fpclassify(check_this) == FP_INFINITE)
-					{
+					if ( MEH(std::fpclassify(check_this) == FP_INFINITE) ) //meh and hmmm: compiler hints that this branch is unlikely to occur
+					{						       //     hopefully might reduce fruitless speculative execution
 						break;
 					}
 					res = ( ( std::fpclassify(check_this) == FP_NORMAL && check_this <= DBL_MAX) ? check_this :  DBL_MAX);
