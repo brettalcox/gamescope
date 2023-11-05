@@ -167,7 +167,7 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-path
 
 
 #ifdef __clang__
-void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( void )
+void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( const bool neverBusyWait, const bool alwaysBusyWait, const long double g_nsPerTick_long  )
 #else
 void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( const bool neverBusyWait, const bool alwaysBusyWait, const long double g_nsPerTick_long  )
 #endif
@@ -329,7 +329,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 #endif
 		uint64_t targetPoint;
 		
-		if ( !neverBusyWait && ( alwaysBusyWait || sleep_cycle > 1 ) && offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) < 1'000'000ll)
+		if ( !neverBusyWait && ( alwaysBusyWait || sleep_cycle > 1 ) 
+		&& offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) < 1'000'000ll)
 		{
 			
 			int64_t diff;
