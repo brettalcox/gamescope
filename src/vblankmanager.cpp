@@ -519,8 +519,16 @@ int vblank_init( void )
 	}
 #endif
 	const long double g_nsPerTick_long = getNsPerTick();
-	#define NEVERBUSYWAIT true,false,0.0
-	std::thread vblankThread( vblankThreadRun, false, true, g_nsPerTick_long );
+	
+	#define NEVER_BUSY_WAIT true,false,CANT_USE_CPU_TIMER
+	#define BALANCED_BUSY_WAIT false,false
+	#define ALWAYS_BUSY_WAIT false,true
+	
+	if ( g_nsPerTick_long == CANT_USE_CPU_TIMER)
+		std::thread vblankThread( vblankThreadRun, NEVER_BUSY_WAIT );
+	else
+		std::thread vblankThread( vblankThreadRun, BALANCED_BUSY_WAIT, g_nsPerTick_long );
+	
 	vblankThread.detach();
 	return g_vblankPipe[ 0 ];
 }

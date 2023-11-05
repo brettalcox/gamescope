@@ -30,11 +30,14 @@
 // easier to distribute as a single file.
 #if (__x86_64__)
 #define LOMP_TARGET_ARCH_X86_64 1
+#define COMPATIBLE 1
 #elif (__aarch64__)
 #define LOMP_TARGET_ARCH_AARCH64 1
+#define COMPATIBLE 1
 #else
-#error "Unknown target architecture"
+//not defining COMPATIBLE means getNSPerTick will just return -1.0
 #endif
+
 
 // Return a formatted string after normalising the value into
 // engineering style and using a suitable unit prefix (e.g. ms, us, ns).
@@ -201,7 +204,9 @@ static std::string CPUModelName() {
     // Whereas AMD always support exactly three extra fields.
     ids = 3;
   } else {
-    fatalError("Unknown brand: %s", brand.c_str());
+    //fatalError("Unknown brand: %s", brand.c_str());
+     std::string output = "Unknown brand: ";
+    return output.append(brand);
   }
 
   char model[256];
@@ -264,7 +269,8 @@ static bool extractLeaf15H(double * time) {
 // Try to extract it from the brand string.
 static bool readHWTickTimeFromName(double * time) {
   auto modelName = CPUModelName();
-
+  if (modelName.starts_with("Unknown brand");
+  	return false;
   // Apple announce the CPU with a clock rate, but it's not the
   // rate at which the emulated rdtsc ticks...
   if (modelName.find("Apple") != std::string::npos) {
@@ -299,7 +305,8 @@ static bool readHWTickTimeFromName(double * time) {
 static double __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) readHWTickTime() {
   // First check whether TSC can sanely be used at all.
   if (!haveInvariantTSC()) {
-    fatalError("TSC may not be invariant. Use another clock!");
+    //fatalError("TSC may not be invariant. Use another clock!");
+    return -1.0;
   }
   double res;
   // Try to get it from Intel's leaf15H
@@ -369,6 +376,8 @@ static uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-frou
   return delta;
 }
 
+
+#define CANT_USE_CPU_TIMER -1.0L
 long double __attribute__((optimize("-fno-unsafe-math-optimizations", "-frounding-math") )) getNsPerTick(void) {
 #if (LOMP_TARGET_ARCH_AARCH64)
   double res = readHWTickTime();
@@ -386,7 +395,7 @@ long double __attribute__((optimize("-fno-unsafe-math-optimizations", "-froundin
   printf("   Invariant TSC: %s\n", invariant ? "True" : "False");
   if (!invariant) {
     printf ("*** Without invariant TSC rdtsc is not a useful timer for wall clock time.\n");
-    return 1;
+    return CANT_USE_CPU_TIMER;
   }
   char const * source = "Unknown";
   double res;
@@ -404,6 +413,7 @@ long double __attribute__((optimize("-fno-unsafe-math-optimizations", "-froundin
           source,
           formatSI(1./res,9,'H').c_str(), formatSI(res,9,'s').c_str());
 #endif
+#ifdef COMPATIBLE
   // Check it...
   double measured = measureTSCtick();
   printf ("   Sanity check against std::chrono::steady_clock gives frequency %sz => %s\n",
@@ -414,4 +424,7 @@ long double __attribute__((optimize("-fno-unsafe-math-optimizations", "-froundin
   printf ("Measured granularity = %llu tick%s => %sz, %s\n",
           (unsigned long long)minTicks, minTicks != 1 ? "s": "", formatSI(1./res,9,'H').c_str(), formatSI(res,9,'s').c_str());
   return (long double)ret*1'000'000'000.0L;
+#else
+  return CANT_USE_CPU_TIMER;
+#endif
 }
