@@ -164,10 +164,12 @@ uint64_t __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-path
         assert(targetPoint <= targetPoint+( ( (long)(targetPoint-copy_targetPoint)*div.rem) / nsecInterval));
 	return targetPoint+(uint64_t)(((long)(targetPoint-copy_targetPoint)*div.rem)/nsecInterval);
 }
+
+
 #ifdef __clang__
 void __attribute__((optimize("-fno-unsafe-math-optimizations"), hot )) vblankThreadRun( void )
 #else
-void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( void )
+void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","-fsplit-loops","-fipa-pta","-ftree-partial-pre","-fira-hoist-pressure","-fdevirtualize-speculatively","-fgcse-after-reload","-fgcse-sm","-fgcse-las"), hot )) vblankThreadRun( const bool neverBusyWait, const bool alwaysBusyWait, const long double g_nsPerTick_long  )
 #endif
 {
 	pthread_setname_np( pthread_self(), "gamescope-vblk" );
@@ -181,9 +183,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 
 	uint32_t skipped_sleep_after_vblank=0;
 	
-
-	static long double g_nsPerTick_long = getNsPerTick();
-	static double g_nsPerTick = (double) g_nsPerTick_long;
+	
+	const double g_nsPerTick = (double) g_nsPerTick_long;
 	std::cout << "g_nsPerTick: " << g_nsPerTick << "\n";
 	
 	uint16_t drawtimes[64] = {1};
@@ -328,7 +329,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 #endif
 		uint64_t targetPoint;
 		
-		if ( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) < 1'000'000ll)
+		if ( !neverBusyWait && ( alwaysBusyWait || sleep_cycle > 1 ) && offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) < 1'000'000ll)
 		{
 			
 			int64_t diff;
@@ -413,7 +414,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 		
 		const uint64_t adjusted_extra_sleep = (uint64_t)llroundl(1'000'000.0*std::sqrt(vblank_adj_factor));
 		// Get on the other side of it now
-		if (!slept || skipped_sleep_after_vblank >= 3 )
+		if ( !alwaysBusyWait && (neverBusyWait || !slept || skipped_sleep_after_vblank >= 3)  )
 		{
 			skipped_sleep_after_vblank=0;
 			sleep_for_nanos( offset + adjusted_extra_sleep );
@@ -517,8 +518,9 @@ int vblank_init( void )
 		return g_vblankPipe[ 0 ];
 	}
 #endif
-
-	std::thread vblankThread( vblankThreadRun );
+	const long double g_nsPerTick_long = getNsPerTick();
+	#define NEVERBUSYWAIT true,false,0.0
+	std::thread vblankThread( vblankThreadRun, false, true, g_nsPerTick_long );
 	vblankThread.detach();
 	return g_vblankPipe[ 0 ];
 }
