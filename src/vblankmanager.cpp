@@ -264,16 +264,18 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 				rollingMaxDrawTime = 
 				  std::min(
 				   ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range)
-				   , (uint64_t)(llroundl( (double)centered_mean / 2.0 
+				   , (uint64_t)(llroundl( (double)centered_mean 
 				      * std::pow( ((double)drawTime)/(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime))
-				                                                           , 1.0 )
+				                                                           , 1.0 ) * ((double) lastDrawTime)
 				                                     )
 		                                 , 2)   
 		                                        )
 		                               )
 		                          );
+				std::cout << "rollingMaxDrawTime after using std::min: " << rollingMaxDrawTime << "\n";
 			}
-			rollingMaxDrawTime = std::clamp(centered_mean, rollingMaxDrawTime, nsecInterval+nsecInterval/20);
+			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/20);
+			std::cout << "rollingMaxDrawTime after using std::clamp: " << rollingMaxDrawTime << "\n";
 			offset = rollingMaxDrawTime + redZone;
 			offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/25, offset, nsecInterval+nsecInterval/25);	
 				
