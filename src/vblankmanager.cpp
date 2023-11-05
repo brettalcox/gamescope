@@ -214,6 +214,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 	int64_t vblank_begin=0;
 	uint64_t time_start = get_time_in_nanos();
 	uint64_t counter = 0;
+	uint64_t lastDrawTime = g_uVblankDrawTimeNS;
+	
 	while ( true )
 	{
 		sleep_cycle++;
@@ -235,7 +237,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		uint64_t drawTime;
 		uint64_t offset;
 		
-		static uint64_t lastDrawTime = g_uVblankDrawTimeNS;
+		
 		
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		if ( !bVRR )
