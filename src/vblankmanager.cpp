@@ -67,9 +67,9 @@ static std::atomic<uint64_t> g_uRollingMaxDrawTime = { g_uStartingDrawTime };
 std::atomic<bool> g_bCurrentlyCompositing = { false };
 
 
-inline void pause(void)
+inline void cpu_pause(void)
 {
-#ifndef __clang__			
+#if !defined(__clang__)			
 # if defined(__x86_64__) || defined(__i386__)
 	__builtin_ia32_pause();
 # else
@@ -79,7 +79,7 @@ inline void pause(void)
 	__sync_synchronize(); //close enough to a pause intrinsic
 	__sync_synchronize();
 	__sync_synchronize();
-# endif
+#
 #else
 # if defined(__x86_64__) || defined(__i386__)
 	_mm_pause();
@@ -91,8 +91,11 @@ inline void pause(void)
 	__sync_synchronize();
 	__sync_synchronize();
 #  endif
+# endif
+#  endif
 # endif	
 #endif
+
 
 }
 
@@ -345,7 +348,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 			{
 				res = DBL_MAX;
 				
-				pause();
+				cpu_pause();
 				
 				diff = (int64_t)readCycleCount() - (int64_t)prev;
 				if ( diff < 0)
@@ -435,7 +438,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations", "-fsplit-paths","
 			{
 				res = DBL_MAX;
 				
-				pause();
+				cpu_pause();
 				
 				diff = (int64_t)readCycleCount() - (int64_t)prev;
 				if (diff < 0)
@@ -501,7 +504,7 @@ void vblankThreadVR()
 }
 #endif
 
-int vblank_init( const bool never_busy_wait, const always_busy_wait )
+int vblank_init( const bool never_busy_wait, const bool always_busy_wait )
 {
 	if ( pipe2( g_vblankPipe, O_CLOEXEC | O_NONBLOCK ) != 0 )
 	{
@@ -525,14 +528,19 @@ int vblank_init( const bool never_busy_wait, const always_busy_wait )
 	#define BALANCED_BUSY_WAIT false,false
 	#define ALWAYS_BUSY_WAIT false,true
 	
-	if ( never_busy_wait || g_nsPerTick_long == CANT_USE_CPU_TIMER)
+	if ( never_busy_wait || g_nsPerTick_long == CANT_USE_CPU_TIMER) {
 		std::thread vblankThread( vblankThreadRun, NEVER_BUSY_WAIT );
-	else if (always_busy_wait)
+		vblankThread.detach();
+	}
+	else if (always_busy_wait) {
 		std::thread vblankThread( vblankThreadRun, ALWAYS_BUSY_WAIT, g_nsPerTick_long );
-	else
+		vblankThread.detach();
+	}
+	else {
 		std::thread vblankThread( vblankThreadRun, BALANCED_BUSY_WAIT, g_nsPerTick_long );
+		vblankThread.detach();
+	}
 	
-	vblankThread.detach();
 	return g_vblankPipe[ 0 ];
 }
 

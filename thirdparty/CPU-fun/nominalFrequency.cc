@@ -269,7 +269,7 @@ static bool extractLeaf15H(double * time) {
 // Try to extract it from the brand string.
 static bool readHWTickTimeFromName(double * time) {
   auto modelName = CPUModelName();
-  if (modelName.starts_with("Unknown brand");
+  if (modelName.starts_with("Unknown brand"))
   	return false;
   // Apple announce the CPU with a clock rate, but it's not the
   // rate at which the emulated rdtsc ticks...
