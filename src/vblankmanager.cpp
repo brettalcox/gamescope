@@ -282,10 +282,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/10);
 			std::cout << "rollingMaxDrawTime after using std::clamp: " << rollingMaxDrawTime << "\n";
 			
+			offset = rollingMaxDrawTime + redzone
 			if (sleep_cycle > 1)
 			{
-				offset = rollingMaxDrawTime + redZone;
 				offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/25, offset, nsecInterval+nsecInterval/20);
+			}
+			else
+			{
+				offset = std::min(std::min(nsecInterval, centered_mean)-nsecInterval/5, offset , nsecInterval+nsecInterval/5);
 			}	
 				
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
