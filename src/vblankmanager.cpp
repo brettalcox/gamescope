@@ -249,7 +249,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			
 			
 			if ( sleep_cycle < 2 && g_bCurrentlyCompositing )
-				drawTime = std::max(drawTime, g_uVBlankDrawTimeMinCompositing);
+				drawTime = fmax(drawTime, g_uVBlankDrawTimeMinCompositing);
 			if (sleep_cycle < 2)
 				drawtimes_pending[index] = (uint16_t)( (drawTime >> 1)/500 );
 			
@@ -262,23 +262,23 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			else
 			{
 				rollingMaxDrawTime = 
-				  std::min(
+				  fmin(
 				   ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range)
 				   , (uint64_t)(llroundl( (double)centered_mean 
-				      * ((double)drawTime) /( max(pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime))
+				      * ((double)drawTime) /( fmax(pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime))
 				                                                           , 1.0 )
 				                                     , 2)/10000000.0, 1)*((double) lastDrawTime))
 		                                			     
 		                                        )
 		                               )
 		                          );
-		        	std::cout << "max(pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1)= " << max(pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1) << "\n";
-				std::cout << "rollingMaxDrawTime after using std::min: " << rollingMaxDrawTime << "\n";
+		        	std::cout << "fmax(pow(fmax((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1)= " << fmax(pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1) << "\n";
+				std::cout << "rollingMaxDrawTime after using fmin: " << rollingMaxDrawTime << "\n";
 			}
 			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/20);
 			std::cout << "rollingMaxDrawTime after using std::clamp: " << rollingMaxDrawTime << "\n";
 			offset = rollingMaxDrawTime + redZone;
-			offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/25, offset, nsecInterval+nsecInterval/25);	
+			offset = std::clamp(fmin(nsecInterval, centered_mean)-nsecInterval/25, offset, nsecInterval+nsecInterval/25);	
 				
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
 
