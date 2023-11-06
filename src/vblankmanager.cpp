@@ -105,8 +105,11 @@ inline void cpu_pause(void)
 #endif
 }
 
-
-
+#include <climits>
+inline int __attribute__((const, always_inline)) heaviside(const int v)
+{
+	return 1 ^ ((unsigned int)v >> (sizeof(int) * CHAR_BIT - 1)); //credit: http://www.graphics.stanford.edu/~seander/bithacks.html#CopyIntegerSign
+}
 
 
 
@@ -261,14 +264,15 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			}
 			else
 			{
+				double delta_check = pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0;
+				double delta = fmax( delta_check * (double)(heaviside(nsecInterval - 2*((int) round(delta_check)))) , 1);
+				//						^ branchless way of checking if value delta_check is so large that it'll mess up
+				//						  the rollingMaxDrawTime calculations
 				rollingMaxDrawTime = 
 				  fmin(
 				   ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range)
 				   , (uint64_t)(llroundl( (double)centered_mean 
-				      * ((double)drawTime) /( fmax(pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime))
-				                                                           , 1.0 )
-				                                     , 2)/10000000.0, 1)*((double) lastDrawTime))
-		                                			     
+				      * ((double)drawTime) /( delta*((double) lastDrawTime))			     
 		                                        )
 		                               )
 		                          );
