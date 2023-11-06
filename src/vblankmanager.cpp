@@ -264,7 +264,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			}
 			else
 			{
-				double delta_check = pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 )/1000000.0, 1.5);
+				double delta_check = pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 )/100000.0, 2);
 				double delta = fmax( delta_check * (double)(heaviside( (int64_t)nsecInterval/1000000 - ((int) round(2.0*delta_check)))) , 1);
 				//						^ branchless way of checking if value delta_check is so large that it'll mess up
 				//						  the rollingMaxDrawTime calculations
