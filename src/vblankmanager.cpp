@@ -265,10 +265,10 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 				  std::min(
 				   ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range)
 				   , (uint64_t)(llroundl( (double)centered_mean 
-				      * std::pow( ((double)drawTime)/(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime))
-				                                                           , 1.0 ) * ((double) lastDrawTime)
-				                                     )
-		                                 , 2)   
+				      * ((double)drawTime) /( pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime))
+				                                                           , 1.0 )
+				                                     , 2)*((double) lastDrawTime))
+		                                			     
 		                                        )
 		                               )
 		                          );
