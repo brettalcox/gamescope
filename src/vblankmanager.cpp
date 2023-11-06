@@ -264,8 +264,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			}
 			else
 			{
-				double delta_check = pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0;
-				double delta = fmax( delta_check * (double)(heaviside(nsecInterval - 2*((int) round(delta_check)))) , 1);
+				double delta_check = pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 1.5)/10000000.0;
+				double delta = fmax( delta_check * (double)(heaviside(nsecInterval - ((int) round(2.0*delta_check)))) , 1);
 				//						^ branchless way of checking if value delta_check is so large that it'll mess up
 				//						  the rollingMaxDrawTime calculations
 				rollingMaxDrawTime = 
@@ -276,7 +276,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		                                        )
 		                               )
 		                          );
-		        	std::cout << "fmax(pow(fmax((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1)= " << fmax(pow(fmax((double)( fabs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1) << "\n";
+		        	std::cout << "delta= " << delta << "\n";
 				std::cout << "rollingMaxDrawTime after using fmin: " << rollingMaxDrawTime << "\n";
 			}
 			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/20);
