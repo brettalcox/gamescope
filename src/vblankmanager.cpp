@@ -279,7 +279,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		        	std::cout << "delta= " << delta << "\n";
 				std::cout << "rollingMaxDrawTime after using fmin: " << rollingMaxDrawTime << "\n";
 			}
-			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/10);
+			rollingMaxDrawTime = std::clamp(centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/10);
 			std::cout << "rollingMaxDrawTime after using std::clamp: " << rollingMaxDrawTime << "\n";
 			
 			offset = rollingMaxDrawTime + redZone;
