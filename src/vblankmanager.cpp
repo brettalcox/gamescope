@@ -218,6 +218,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 	uint64_t time_start = get_time_in_nanos();
 	uint64_t counter = 0;
 	uint64_t lastDrawTime = g_uVblankDrawTimeNS;
+	uint64_t first_cycle_offset = 0;
 	
 	while ( true )
 	{
@@ -240,7 +241,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		uint64_t drawTime;
 		uint64_t offset;
 		
-		
+		uint64_t second_sleep_adj_wait = 0;
 		
 		bool bVRR = drm_get_vrr_in_use( &g_DRM );
 		if ( !bVRR )
@@ -287,10 +288,15 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			if (sleep_cycle > 1)
 			{
 				offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/25, offset, nsecInterval+nsecInterval/20);
+				if (offset > first_cycle_offset)
+				{
+					second_sleep_adj_wait = (offset - first_cycle_offset) * sleep_weights[0] / 100;
+				}
 			}
 			else
 			{
 				offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/5, offset , nsecInterval+nsecInterval/5);
+				first_cycle_offset=offset;
 			}	
 				
 			fprintf( stdout, "sleep_cycle=%i offset clamping: ", sleep_cycle );
@@ -364,7 +370,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 #define HMMM(expr) __builtin_expect_with_probability(expr, 1, .15) //hmmm has slightly higher probability than meh
 #define MEH(expr) __builtin_expect_with_probability(expr, 1, .02)
 		if ( !neverBusyWait && ( alwaysBusyWait || sleep_cycle > 1 ) 
-		&& offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) < 1'000'000ll)
+		&& offset*sleep_weights[sleep_cycle-1] / (100ll) < 1'000'000ll)
 		{
 			
 			int64_t diff;
@@ -374,7 +380,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			
 			uint64_t prev = readCycleCount();
 			
-			double compared_to = (double) ( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
+			double compared_to = (double) ( second_sleep_adj_wait + offset*sleep_weights[sleep_cycle-1] / (100ll) );
+			
 			do
 			{
 				res = DBL_MAX;
@@ -409,7 +416,8 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		{
 			slept=true;
 			
-			targetPoint = vblank_next_target( offset*sleep_weights[sleep_cycle-1] / (100ll*g_nOutputRefresh) );
+			
+			targetPoint = vblank_next_target( second_sleep_adj_wait + offset*sleep_weights[sleep_cycle-1] / (100ll) );
 			
 			sleep_until_nanos( targetPoint );
 			targetPoint = vblank_next_target(offset);
@@ -452,7 +460,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		if ( !alwaysBusyWait && (neverBusyWait || !slept || skipped_sleep_after_vblank >= 3)  )
 		{
 			skipped_sleep_after_vblank=0;
-			sleep_for_nanos( offset + adjusted_extra_sleep );
+			sleep_for_nanos( offset + second_sleep_adj_wait + adjusted_extra_sleep );
 		}
 		else
 		{
@@ -464,7 +472,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			
 			uint64_t prev = readCycleCount();
 			
-			double compared_to = (double) (offset + adjusted_extra_sleep);
+			double compared_to = (double) ( offset + second_sleep_adj_wait + adjusted_extra_sleep + first_cycle_offset * sleep_weights[1] / (sleep_weights[0]) );
 			do
 			{
 				res = DBL_MAX;
