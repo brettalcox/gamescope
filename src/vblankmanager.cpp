@@ -272,6 +272,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		                                        )
 		                               )
 		                          );
+		        	std::cout << "pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)) , 1.0 ), 2)= " << pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)) , 1.0 ), 2) << "\n";
 				std::cout << "rollingMaxDrawTime after using std::min: " << rollingMaxDrawTime << "\n";
 			}
 			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/20);
