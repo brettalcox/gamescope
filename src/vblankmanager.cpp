@@ -281,7 +281,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		        	std::cout << "delta= " << delta << "\n";
 				std::cout << "rollingMaxDrawTime after using fmin: " << rollingMaxDrawTime << "\n";
 			}
-			rollingMaxDrawTime = std::clamp(centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/10);
+			rollingMaxDrawTime = std::clamp(centered_mean/2, rollingMaxDrawTime, nsecInterval+nsecInterval/10);
 			std::cout << "rollingMaxDrawTime after using std::clamp: " << rollingMaxDrawTime << "\n";
 			
 			offset = rollingMaxDrawTime + redZone;
@@ -433,7 +433,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			.target_vblank_time = targetPoint + offset,
 			.pipe_write_time    = get_time_in_nanos(),
 		};
-
+		std::cout << "vblank cycle time before write(): " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
 		ssize_t ret = write( g_vblankPipe[ 1 ], &time_info, sizeof( time_info ) );
 		if ( ret <= 0 )
 		{
@@ -442,7 +442,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		else
 		{
 			gpuvis_trace_printf( "sent vblank" );
-			std::cout << "vblank cycle time: " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
+			std::cout << "vblank cycle time after write(): " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
 			counter++;
 		}
 		vblank_begin=0;
