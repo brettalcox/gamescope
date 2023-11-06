@@ -295,7 +295,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			}
 			else
 			{
-				offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/5, offset , nsecInterval+nsecInterval/5);
+				offset = std::clamp(std::min(nsecInterval, centered_mean)-nsecInterval/20, offset , nsecInterval+nsecInterval/5);
 				first_cycle_offset=offset;
 			}	
 				
