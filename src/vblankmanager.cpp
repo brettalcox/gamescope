@@ -381,7 +381,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			uint64_t prev = readCycleCount();
 			
 			double compared_to = (double) ( second_sleep_adj_wait + offset*sleep_weights[sleep_cycle-1] / (100ll) );
-			
+			std::cout << "vblank cycle time before second wait: " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
 			do
 			{
 				res = DBL_MAX;
@@ -416,7 +416,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		{
 			slept=true;
 			
-			
+			std::cout << "vblank cycle time before second sleep: " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
 			targetPoint = vblank_next_target( second_sleep_adj_wait + offset*sleep_weights[sleep_cycle-1] / (100ll) );
 			
 			sleep_until_nanos( targetPoint );
