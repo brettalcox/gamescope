@@ -265,14 +265,14 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 				  std::min(
 				   ( ( alpha * rollingMaxDrawTime ) + ( range - alpha ) * drawTime ) / (range)
 				   , (uint64_t)(llroundl( (double)centered_mean 
-				      * ((double)drawTime) /( pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime))
+				      * ((double)drawTime) /( max(pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime))
 				                                                           , 1.0 )
-				                                     , 2)*((double) lastDrawTime))
+				                                     , 2)/10000000.0, 1)*((double) lastDrawTime))
 		                                			     
 		                                        )
 		                               )
 		                          );
-		        	std::cout << "pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)) , 1.0 ), 2)= " << pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)) , 1.0 ), 2) << "\n";
+		        	std::cout << "max(pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1)= " << max(pow(std::max((double)( std::abs((int64_t)lastDrawTime - (int64_t)drawTime)), 1.0 ), 2)/10000000.0, 1) << "\n";
 				std::cout << "rollingMaxDrawTime after using std::min: " << rollingMaxDrawTime << "\n";
 			}
 			rollingMaxDrawTime = std::clamp(3*centered_mean/4, rollingMaxDrawTime, nsecInterval+nsecInterval/20);
