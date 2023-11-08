@@ -220,6 +220,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 	uint64_t lastDrawTime = g_uVblankDrawTimeNS;
 	uint64_t first_cycle_offset = 0;
 	
+	static uint64_t lastOffset = INT_MAX;
 	while ( true )
 	{
 		sleep_cycle++;
@@ -346,7 +347,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		// Debug stuff for logging missed vblanks
 		static uint64_t vblankIdx = 0;
 		
-		static uint64_t lastOffset = g_uVblankDrawTimeNS + redZone;
+		//static uint64_t lastOffset = g_uVblankDrawTimeNS + redZone;
 
 		if ( sleep_cycle > 1 && (vblankIdx++ % 300 == 0 || drawTime > lastOffset) )
 		{
@@ -420,6 +421,12 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			targetPoint = vblank_next_target( second_sleep_adj_wait + offset*sleep_weights[sleep_cycle-1] / (100ll) );
 			
 			sleep_until_nanos( targetPoint );
+			if ( sleep_cycle < 2 && (int64_t)get_time_in_nanos() - (int64_t)vblank_begin > (int64_t)fmax( (double) offset, (double) lastOffset) )
+			{
+				offset=(int64_t)fmin(fmax( (double) offset, (double) lastOffset), (double)nsecInterval+(double)redZone/2.0);
+				targetPoint = vblank_next_target(offset);
+				goto SKIPPING_SECOND_SLEEP;
+			}
 			targetPoint = vblank_next_target(offset);
 		}
 		
@@ -428,6 +435,7 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 			continue;
 		}
 		
+	SKIPPING_SECOND_SLEEP:;
 		VBlankTimeInfo_t time_info =
 		{
 			.target_vblank_time = targetPoint + offset,
