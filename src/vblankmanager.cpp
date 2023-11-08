@@ -417,10 +417,13 @@ void __attribute__((optimize("-fno-unsafe-math-optimizations","-fno-trapping-mat
 		{
 			slept=true;
 			
-			std::cout << "vblank cycle time before second sleep: " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
+			if (sleep_cycle < 2)
+				std::cout << "vblank cycle time before first sleep: " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
+			else
+				std::cout << "vblank cycle time before second sleep: " << ( (long double)(get_time_in_nanos()-vblank_begin) )/1'000'000.0L << "ms\n";
 			targetPoint = vblank_next_target( second_sleep_adj_wait + offset*sleep_weights[sleep_cycle-1] / (100ll) );
 			
-			sleep_until_nanos( targetPoint );
+			sleep_until_nanos( targetPoint ); 
 			if ( sleep_cycle < 2 && (int64_t)get_time_in_nanos() - (int64_t)vblank_begin > (int64_t)fmax( (double) offset, (double) lastOffset) )
 			{
 				offset=(int64_t)fmin(fmax( (double) offset, (double) lastOffset), (double)nsecInterval+(double)redZone/2.0);
